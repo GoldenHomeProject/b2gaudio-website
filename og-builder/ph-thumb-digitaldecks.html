@@ -1,0 +1,23 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+/* 512x512 Product Hunt thumbnail for Digital Decks. Must read at 240px.
+   The app icon only: no Pokemon logo, Poke Ball or card art (trademark note in 01_PRODUCT_HUNT.md). */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:512px;height:512px}
+body{background:#0A0A0F;position:relative;overflow:hidden;
+  font-family:-apple-system,"SF Pro Display",Arial,sans-serif}
+.glow{position:absolute;width:640px;height:640px;border-radius:50%;
+  left:50%;top:40%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(47,168,255,.32) 0%,rgba(47,168,255,0) 66%)}
+.wrap{position:relative;width:100%;height:100%;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.logo{width:236px;height:236px;border-radius:52px;box-shadow:0 22px 50px rgba(0,0,0,.6);border:1.5px solid rgba(255,255,255,.1)}
+.line{font-size:42px;font-weight:800;letter-spacing:-.025em;color:#F5F5F7;
+  line-height:1.1;text-align:center}
+.line span{color:#2FA8FF}
+</style></head><body>
+<div class="glow"></div>
+<div class="wrap">
+  <img class="logo" src="ph-assets/dd-icon.png" alt="">
+  <div class="line">Scan it. Collect it.<br><span>Build a real deck.</span></div>
+</div>
+</body></html>

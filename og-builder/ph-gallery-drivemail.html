@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DriveMail Voice — Product Hunt gallery slides</title>
+<!--
+  1270x760 Product Hunt gallery, one slide per ?slide=N (1-5). Render with:
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
+      --hide-scrollbars --force-device-scale-factor=1 --window-size=1270,760 \
+      --screenshot=OUT.png "file://$PWD/og-builder/ph-gallery-drivemail.html?slide=N"
+
+  Every claim traces to marketing/products/drivemail/launch/00_FACTS_AND_CLAIMS.md.
+  Hard rules from that file: no Siri/SiriKit, never "never stored" (mail IS cached on
+  the phone, encrypted), Gmail = app password, English only, banner on the phone only.
+
+  Screens in ph-assets/ are crops of the App Store captures in
+  DriveMailVoice/marketing/screenshots/ (fixture inbox, example.com addresses).
+-->
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0A0A0F;--surface:#151520;--surface2:#1E1E2E;
+    --accent:#4A90D9;--accent-hi:#6AAAF0;
+    --text:#F5F5F7;--text2:#A1A1AA;--text3:#71717A;--border:#2A2A3A;
+  }
+  html,body{width:1270px;height:760px}
+  body{background:var(--bg);color:var(--text);overflow:hidden;position:relative;
+    font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+  .slide{display:none;width:1270px;height:760px;position:relative;overflow:hidden}
+  body.s1 #s1,body.s2 #s2,body.s3 #s3,body.s4 #s4,body.s5 #s5{display:block}
+
+  .glow{position:absolute;width:1000px;height:1000px;border-radius:50%;right:-300px;top:-260px;
+    background:radial-gradient(circle,rgba(74,144,217,.28) 0%,rgba(74,144,217,.08) 40%,rgba(74,144,217,0) 70%)}
+  .glowL{position:absolute;width:900px;height:900px;border-radius:50%;left:-300px;top:-120px;
+    background:radial-gradient(circle,rgba(74,144,217,.22) 0%,rgba(74,144,217,0) 66%)}
+  .glowC{position:absolute;width:1100px;height:1100px;border-radius:50%;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle,rgba(74,144,217,.16) 0%,rgba(74,144,217,0) 65%)}
+
+  .pad{position:relative;height:100%;padding:70px 80px;display:flex;flex-direction:column}
+  .eyebrow{display:inline-block;align-self:flex-start;font-size:15px;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--accent-hi);
+    border:1.5px solid rgba(74,144,217,.5);border-radius:999px;padding:8px 17px;margin-bottom:24px}
+  h1{font-size:64px;line-height:1.02;font-weight:800;letter-spacing:-.032em}
+  h2{font-size:52px;line-height:1.05;font-weight:800;letter-spacing:-.03em;margin-bottom:18px}
+  .accent{color:var(--accent-hi)}
+  .sub{font-size:23px;line-height:1.42;color:var(--text2)}
+  .sub strong{color:var(--text);font-weight:600}
+  .foot{position:absolute;left:80px;bottom:40px;font-size:17px;font-weight:600;color:var(--text3)}
+
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+  .brand img{width:52px;height:52px;border-radius:12px}
+  .brand b{font-size:22px;font-weight:700;letter-spacing:-.01em}
+
+  /* screenshots */
+  .phone{display:block;border-radius:40px;border:3px solid #2e2e3e;
+    box-shadow:0 30px 60px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.04)}
+  .car{display:block;border-radius:22px;border:3px solid #2e2e3e;
+    box-shadow:0 30px 60px rgba(0,0,0,.6)}
+
+  .split{display:flex;align-items:center;gap:64px;height:100%;position:relative}
+  .split .copy{flex:1}
+
+  .chips{display:flex;flex-wrap:wrap;gap:12px;margin:6px 0 24px}
+  .chip{font-size:24px;font-weight:700;padding:11px 20px;border-radius:14px;
+    background:rgba(74,144,217,.14);border:1.5px solid rgba(74,144,217,.5);color:var(--text)}
+  .chip::before{content:"\201C";color:var(--accent-hi)}
+  .chip::after{content:"\201D";color:var(--accent-hi)}
+
+  .steps{display:flex;flex-direction:column;gap:14px}
+  .step{display:flex;gap:20px;align-items:flex-start;background:var(--surface);
+    border:1px solid var(--border);border-radius:16px;padding:20px 24px}
+  .num{flex:none;width:40px;height:40px;border-radius:10px;background:rgba(74,144,217,.16);
+    border:1px solid rgba(74,144,217,.5);color:var(--accent-hi);
+    font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .step h4{font-size:26px;font-weight:700;margin-bottom:6px}
+  .step p{font-size:20px;color:var(--text2);line-height:1.4}
+  #s3 .step{padding:26px 28px}
+  #s3 .steps{gap:18px}
+  #s3 h2{font-size:58px;margin-bottom:24px}
+
+  .rows{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .row{display:flex;gap:18px;align-items:baseline;background:var(--surface);
+    border:1px solid var(--border);border-radius:14px;padding:16px 22px}
+  .row .who{flex:none;width:92px;font-size:20px;font-weight:800}
+  .row .how{font-size:18px;color:var(--text2);line-height:1.4}
+  .row .how strong{color:var(--text);font-weight:600}
+
+  .cols{display:flex;gap:24px;flex:1;align-items:stretch;margin-top:8px}
+  .col{flex:1;border-radius:18px;padding:28px 30px;border:1px solid var(--border);background:var(--surface)}
+  .col .lbl{font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent-hi);margin-bottom:14px}
+  .col ul{list-style:none}
+  .col li{font-size:19px;line-height:1.38;color:var(--text2);padding:8px 0 8px 30px;position:relative}
+  .col li strong{color:var(--text);font-weight:600}
+  .col li::before{content:"\2713";position:absolute;left:0;top:8px;color:var(--accent-hi);font-weight:800}
+  #s5 .pad{justify-content:center}
+  #s5 h2{font-size:58px;margin-bottom:26px}
+  #s5 .cols{flex:none}
+  #s5 .col{padding:32px 34px}
+  #s5 .col .lbl{font-size:15px;margin-bottom:12px}
+  #s5 .col li{font-size:22px;padding:10px 0 10px 34px}
+  #s5 .col li::before{top:10px}
+</style>
+</head>
+<body>
+
+<!-- 1 — hero: the CarPlay screen -->
+<section class="slide" id="s1">
+  <div class="glow"></div>
+  <div class="pad">
+    <div class="split" style="gap:56px">
+      <div class="copy" style="flex:none;width:470px">
+        <div class="brand"><img src="../drivemail-logo.png" alt=""><b>DriveMail Voice</b></div>
+        <h1>Your email,<br>read aloud<br><span class="accent">on CarPlay.</span></h1>
+        <p class="sub" style="margin-top:22px">
+          Unread <strong>Gmail, Outlook and iCloud</strong> mail, one message after another.
+          Reply, forward, skip or mark read <strong>by voice</strong>.</p>
+        <p class="sub" style="margin-top:18px;font-size:19px;color:var(--text3)">No ads on the car screen, ever.</p>
+      </div>
+      <img class="car" src="ph-assets/dm-carplay.png" alt="" style="width:620px;flex:none">
+    </div>
+  </div>
+</section>
+
+<!-- 2 — voice commands, with the real playback screen -->
+<section class="slide" id="s2">
+  <div class="glowL"></div>
+  <div class="pad" style="padding-top:44px;padding-bottom:0">
+    <div class="split">
+      <img class="phone" src="ph-assets/dm-playback.jpg" alt="" style="height:650px;align-self:flex-start">
+      <div class="copy">
+        <div class="eyebrow">Voice commands</div>
+        <h2>Say it anytime.<br><span class="accent">Even mid-email.</span></h2>
+        <div class="chips">
+          <span class="chip">skip</span><span class="chip">mark as read</span>
+          <span class="chip">reply</span><span class="chip">forward</span><span class="chip">summary</span>
+        </div>
+        <p class="sub" style="font-size:21px">Works with the screen locked or the phone in a pocket.
+          It ignores its own reading voice, so an email can't trigger a command by itself.</p>
+        <p class="sub" style="font-size:19px;margin-top:16px;color:var(--text3)">
+          Speeds 0.75× to 2× · oldest or newest first · AI summaries made on the phone</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 — reply / forward -->
+<section class="slide" id="s3">
+  <div class="glow"></div>
+  <div class="pad">
+    <div class="eyebrow">Reply and forward</div>
+    <h2>Dictate it. Hear it back.<br><span class="accent">Then say “send”.</span></h2>
+    <div class="steps" style="margin-top:10px">
+      <div class="step"><div class="num">1</div><div>
+        <h4>Say “reply” or “forward”</h4>
+        <p>Right in the middle of the email if you like. Then just talk.</p></div></div>
+      <div class="step"><div class="num">2</div><div>
+        <h4>Hear it read back</h4>
+        <p>Dictation can mishear, so nothing goes out until you've heard it. Forwards read the address back too.</p></div></div>
+      <div class="step"><div class="num">3</div><div>
+        <h4>Say “send”</h4>
+        <p>Replies add a “Sent by voice while driving” sign-off by default. One toggle in Settings turns it off.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 — accounts, with the real home screen; the setup friction said out loud -->
+<section class="slide" id="s4">
+  <div class="glowL"></div>
+  <div class="pad" style="padding-top:44px;padding-bottom:0">
+    <div class="split">
+      <img class="phone" src="ph-assets/dm-home.png" alt="" style="height:650px;align-self:flex-start">
+      <div class="copy">
+        <div class="eyebrow">Your accounts</div>
+        <h2>Gmail, Outlook and iCloud <span class="accent">in one stream.</span></h2>
+        <div class="rows">
+          <div class="row"><div class="who">Gmail</div>
+            <div class="how">A Google <strong>app password</strong>, about 2 minutes. Needs 2-Step Verification. Work (Workspace) Gmail usually can't use one.</div></div>
+          <div class="row"><div class="who">iCloud</div>
+            <div class="how">An Apple app-specific password.</div></div>
+          <div class="row"><div class="who">Outlook</div>
+            <div class="how">The normal Microsoft sign-in.</div></div>
+        </div>
+        <p class="sub" style="font-size:19px;margin-top:18px;color:var(--text3)">
+          Smart reading skips signatures, legal disclaimers and tracking links.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 — privacy + price, stated precisely -->
+<section class="slide" id="s5">
+  <div class="glowC"></div>
+  <div class="pad">
+    <div class="eyebrow">No catch, spelled out</div>
+    <h2>No servers. <span class="accent">No subscription.</span></h2>
+    <div class="cols">
+      <div class="col">
+        <div class="lbl">Privacy</div>
+        <ul>
+          <li><strong>No backend.</strong> It talks only to your email provider.</li>
+          <li>Speech recognition runs on your phone. <strong>Audio is never recorded</strong> or sent anywhere.</li>
+          <li>Emails are cached on your phone, <strong>encrypted at rest</strong>, and cleared when you remove the account or tap Clear cache.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="lbl">Price</div>
+        <ul>
+          <li><strong>Free</strong>, with one small banner on the phone's home screen.</li>
+          <li><strong>Never an ad on the car screen.</strong></li>
+          <li><strong>$0.99 once</strong> removes the banner. No subscription.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot" style="position:static;margin-top:22px">English only · iOS 17+ · iPhone and CarPlay · made by one developer</div>
+  </div>
+</section>
+
+<script>
+  var n = new URLSearchParams(location.search).get('slide') || '1';
+  document.body.className = 's' + n;
+</script>
+</body>
+</html>

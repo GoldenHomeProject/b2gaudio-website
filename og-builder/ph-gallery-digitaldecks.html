@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Digital Decks — Product Hunt gallery slides</title>
+<!--
+  1270x760 Product Hunt gallery, one slide per ?slide=N (1-5). Render with:
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
+      --hide-scrollbars --force-device-scale-factor=1 --window-size=1270,760 \
+      --screenshot=OUT.png "file://$PWD/og-builder/ph-gallery-digitaldecks.html?slide=N"
+
+  Every claim traces to marketing/products/digital-decks/launch/00_FACTS_AND_CLAIMS.md.
+  Rules from that file: lead with deck-building for kids, not prices; prices are "rough
+  asking-price estimates", never "market value"/"worth"; no Pokemon logo or Poke Ball;
+  unofficial fan tool; no real names or faces.
+
+  Screens in ph-assets/dd-*.jpg are the 2026-09-28 App Store captures from
+  Pricedex/Marketing/screenshots/ (seeded DEBUG profile "Sam", a made-up name).
+  NEVER use anything from Pricedex/Marketing/screenshots-old-with-names/ ("Ben", "WC").
+  Card detail (full-bleed card art) is deliberately left out; list-size art only.
+
+  Slide 2 is text-only because there is no screenshot of a finished deck (stars +
+  "Make It Better") yet. When one exists, swap it into slide 2 beside the copy.
+-->
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0A0A0F;--surface:#151520;--surface2:#1D1D2B;
+    --accent:#2FA8FF;--red:#FF3A3A;--gold:#F2C14E;
+    --text:#F5F5F7;--text2:#A1A1AA;--text3:#71717A;--border:#2A2A3A;
+  }
+  html,body{width:1270px;height:760px}
+  body{background:var(--bg);color:var(--text);overflow:hidden;position:relative;
+    font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+  .slide{display:none;width:1270px;height:760px;position:relative;overflow:hidden}
+  body.s1 #s1,body.s2 #s2,body.s3 #s3,body.s4 #s4,body.s5 #s5{display:block}
+
+  .glow{position:absolute;width:1000px;height:1000px;border-radius:50%;right:-280px;top:-240px;
+    background:radial-gradient(circle,rgba(47,168,255,.26) 0%,rgba(47,168,255,.07) 40%,rgba(47,168,255,0) 70%)}
+  .glowR{position:absolute;width:800px;height:800px;border-radius:50%;left:-260px;bottom:-360px;
+    background:radial-gradient(circle,rgba(255,58,58,.16) 0%,rgba(255,58,58,0) 66%)}
+  .glowC{position:absolute;width:1100px;height:1100px;border-radius:50%;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle,rgba(47,168,255,.15) 0%,rgba(47,168,255,0) 65%)}
+
+  .pad{position:relative;height:100%;padding:70px 80px;display:flex;flex-direction:column}
+  .eyebrow{display:inline-block;align-self:flex-start;font-size:15px;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--accent);
+    border:1.5px solid rgba(47,168,255,.5);border-radius:999px;padding:8px 17px;margin-bottom:24px}
+  h1{font-size:66px;line-height:1.02;font-weight:800;letter-spacing:-.032em}
+  h2{font-size:52px;line-height:1.05;font-weight:800;letter-spacing:-.03em;margin-bottom:18px}
+  .accent{color:var(--accent)}
+  .red{color:var(--red)}
+  .sub{font-size:23px;line-height:1.42;color:var(--text2)}
+  .sub strong{color:var(--text);font-weight:600}
+  .muted{font-size:18px;line-height:1.45;color:var(--text3)}
+
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+  .brand img{width:56px;height:56px;border-radius:13px}
+  .brand b{font-size:22px;font-weight:700;letter-spacing:-.01em}
+
+  .phone{display:block;border-radius:40px;border:3px solid #2e2e3e;
+    box-shadow:0 30px 60px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.04)}
+  .split{display:flex;align-items:center;gap:64px;height:100%;position:relative}
+  .split .copy{flex:1}
+
+  .note{margin-top:22px;border-left:4px solid var(--gold);background:rgba(242,193,78,.08);
+    border-radius:0 12px 12px 0;padding:14px 18px;font-size:17px;line-height:1.45;color:var(--text2)}
+  .note strong{color:var(--text)}
+
+  .grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-content:center}
+  .card{background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:26px 30px}
+  .card h3{font-size:25px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+  .card h3 i{font-style:normal;flex:none;width:34px;height:34px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;
+    background:rgba(47,168,255,.15);border:1px solid rgba(47,168,255,.5);color:var(--accent)}
+  .card p{font-size:18px;color:var(--text2);line-height:1.42}
+
+  .pills{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 28px}
+  .pill{font-size:24px;font-weight:700;padding:14px 22px;border-radius:14px;
+    background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .pill .x{color:var(--red);font-weight:800}
+  .pill.price{background:rgba(47,168,255,.14);border-color:rgba(47,168,255,.55)}
+  .list{list-style:none}
+  .list li{font-size:21px;line-height:1.42;color:var(--text2);padding:7px 0 7px 32px;position:relative}
+  .list li strong{color:var(--text);font-weight:600}
+  .list li::before{content:"\2713";position:absolute;left:0;top:7px;color:var(--accent);font-weight:800}
+  #s2 h2{font-size:58px}
+  #s2 .card{padding:30px 32px}
+  #s2 .card h3{font-size:28px;margin-bottom:10px}
+  #s2 .card p{font-size:20px}
+  #s5 h2{font-size:60px;margin-bottom:24px}
+  #s5 .list li{font-size:23px}
+</style>
+</head>
+<body>
+
+<!-- 1 — hero: the deck builder, for kids -->
+<section class="slide" id="s1">
+  <div class="glow"></div><div class="glowR"></div>
+  <div class="pad" style="padding-top:44px;padding-bottom:0">
+    <div class="split">
+      <div class="copy">
+        <div class="brand"><img src="ph-assets/dd-icon.png" alt=""><b>Digital Decks</b></div>
+        <h1>Their cards.<br><span class="accent">Their deck.</span></h1>
+        <p class="sub" style="margin-top:22px;max-width:600px">
+          Scan your kid's Pokémon cards, then pick 1 or 2 types. Digital Decks builds the
+          <strong>best legal deck it can from the cards they actually own</strong>.</p>
+        <p class="muted" style="margin-top:18px">For iPhone and iPad · $0.99 once · no ads</p>
+      </div>
+      <img class="phone" src="ph-assets/dd-deck-builder.jpg" alt="" style="height:650px;align-self:flex-start;margin-right:40px">
+    </div>
+  </div>
+</section>
+
+<!-- 2 — what the deck builder does (text-only until a deck-result screenshot exists) -->
+<section class="slide" id="s2">
+  <div class="glowC"></div>
+  <div class="pad">
+    <div class="eyebrow">The deck builder</div>
+    <h2>Built only from <span class="accent">cards they own.</span></h2>
+    <div class="grid">
+      <div class="card"><h3><i>1</i>Never invents a card</h3>
+        <p>Every card in the deck is one that's already in that kid's collection.</p></div>
+      <div class="card"><h3><i>2</i>Plays by the rules</h3>
+        <p>Keeps evolution lines together, matches energy to attack costs, knows Rare Candy and the Supporter, Stadium and Tool rules.</p></div>
+      <div class="card"><h3><i>3</i>Stars and coaching</h3>
+        <p>A 1-to-5-star rating, and tips on how to play it.</p></div>
+      <div class="card"><h3><i>4</i>“Make It Better”</h3>
+        <p>A list of the exact cards that would improve it. Handy for birthdays.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 — scan -->
+<section class="slide" id="s3">
+  <div class="glow"></div>
+  <div class="pad" style="padding-top:44px;padding-bottom:0">
+    <div class="split">
+      <img class="phone" src="ph-assets/dd-scan.jpg" alt="" style="height:650px;align-self:flex-start">
+      <div class="copy">
+        <div class="eyebrow">Scan</div>
+        <h2>Point at the number<br><span class="accent">in the corner.</span></h2>
+        <p class="sub" style="font-size:21px">The phone reads the collector number (like 4/102) on the device.
+          <strong>No photo is saved or uploaded.</strong> Then it shows the set, the rarity in plain words
+          (“about 1 in 13 packs”) and a rough price for your printing (regular, holo or reverse holo).</p>
+        <div class="note"><strong>Prices are rough asking-price estimates</strong> from public listings, not appraisals.
+          Please don't use them to decide what to pay for, sell or insure a card.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 — collection, per-kid profiles -->
+<section class="slide" id="s4">
+  <div class="glowR" style="left:auto;right:-260px"></div><div class="glow" style="right:auto;left:-300px"></div>
+  <div class="pad" style="padding-top:44px;padding-bottom:0">
+    <div class="split">
+      <div class="copy">
+        <div class="eyebrow">Collection</div>
+        <h2>A collection <span class="accent">for each kid.</span></h2>
+        <ul class="list">
+          <li><strong>Separate profiles</strong>, so nobody can change a sibling's cards.</li>
+          <li>Copy counts, and filters by kind, type, set and rarity.</li>
+          <li><strong>Read-aloud</strong> of card details for kids who can't read yet.</li>
+          <li>Rare pulls get a celebration.</li>
+        </ul>
+        <p class="muted" style="margin-top:18px">The collection lives on the device it was built on. No cloud sync.</p>
+      </div>
+      <img class="phone" src="ph-assets/dd-library.jpg" alt="" style="height:650px;align-self:flex-start;margin-right:40px">
+    </div>
+  </div>
+</section>
+
+<!-- 5 — what it doesn't do -->
+<section class="slide" id="s5">
+  <div class="glowC"></div>
+  <div class="pad" style="justify-content:center">
+    <div class="eyebrow">Made for kids</div>
+    <h2>Nothing sneaky. <span class="accent">$0.99 once.</span></h2>
+    <div class="pills">
+      <span class="pill"><span class="x">✕</span> Ads</span>
+      <span class="pill"><span class="x">✕</span> In-app purchases</span>
+      <span class="pill"><span class="x">✕</span> Accounts</span>
+      <span class="pill"><span class="x">✕</span> Chat</span>
+      <span class="pill"><span class="x">✕</span> Analytics</span>
+      <span class="pill price">App Privacy: Data Not Collected</span>
+    </div>
+    <ul class="list">
+      <li>The one link out of the app sits behind a <strong>parental gate</strong>.</li>
+      <li>Built by a dad for his own two kids.</li>
+      <li>English-language Pokémon cards only. iPhone and iPad, iOS 17+.</li>
+    </ul>
+    <p class="muted" style="margin-top:24px;font-size:15px">Unofficial fan tool. Not affiliated with or endorsed by Nintendo,
+      Creatures, GAME FREAK, The Pokémon Company International or Wizards of the Coast.</p>
+  </div>
+</section>
+
+<script>
+  var n = new URLSearchParams(location.search).get('slide') || '1';
+  document.body.className = 's' + n;
+</script>
+</body>
+</html>
