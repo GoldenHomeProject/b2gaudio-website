@@ -617,3 +617,7 @@ pages.append(dict(
 for p in pages:
     (SITE / p["file"]).write_text(render(p))
     print("wrote", p["file"])
+
+# Re-apply App Store campaign tags; render() emits untagged store links.
+import subprocess, sys
+subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name("tag_store_links.py"))], check=True)
