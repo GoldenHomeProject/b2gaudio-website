@@ -7,8 +7,9 @@ Every product claim here is traceable to:
 """
 import html, json, pathlib, re
 
-SITE = pathlib.Path.home() / "Developer/b2gaudio-website"
-MENU = (SITE / "_appmenu.html").read_text()
+SITE = pathlib.Path(__file__).resolve().parent.parent
+# Header, footer and favicon come from tools/build_chrome.py (data: tools/apps.json), which this
+# script runs after writing the pages; render() only leaves the empty marker blocks for it to fill.
 
 B2G_STORE = "https://apps.apple.com/us/app/b2gaudio/id6759938468"
 DD_STORE = "https://apps.apple.com/us/app/digital-decks-card-scanner/id6794926765"
@@ -16,16 +17,11 @@ DD_STORE = "https://apps.apple.com/us/app/digital-decks-card-scanner/id679492676
 APPS = {
     "b2g": dict(
         name="B2Gaudio", store=B2G_STORE, app_id="6759938468", accent="#FF6B35", accent_dim="#CC5529",
-        home="/", home_label="B2Gaudio Home",
-        logo='B2G<span>audio</span>', support="support.html", privacy="privacy.html", terms="terms.html",
         og_image="https://b2gaudio.com/og-image.png", icon="favicon.png",
         cta_top="Download B2Gaudio, free", cta_bottom="Get B2Gaudio on the App Store",
     ),
     "dd": dict(
         name="Digital Decks", store=DD_STORE, app_id="6794926765", accent="#2FA8FF", accent_dim="#1F8AD6",
-        home="digitaldecks.html", home_label="Digital Decks Home",
-        logo='Digital <span>Decks</span>', support="digitaldecks-support.html",
-        privacy="digitaldecks-privacy.html", terms="digitaldecks-terms.html",
         og_image=None, icon="digitaldecks-icon.png",
         cta_top="Get Digital Decks on the App Store", cta_bottom="Download Digital Decks",
     ),
@@ -35,11 +31,6 @@ CSS = """:root{--bg:#0A0A0F;--surface:#151520;--surface2:#1E1E2E;--accent:%(acce
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-nav{position:fixed;top:0;width:100%%;z-index:100;background:rgba(10,10,15,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
-.nav-inner{max-width:1100px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-text{font-size:1.3rem;font-weight:700;color:var(--text)}.logo-text span{color:var(--accent)}
-.nav-links{list-style:none;display:flex;gap:22px;align-items:center}.nav-links a{color:var(--text2);font-size:.95rem}.nav-links a.btn{color:#fff}
 .btn{display:inline-block;background:var(--accent);color:#fff;padding:12px 22px;border-radius:999px;font-weight:600}.btn:hover{background:var(--accent-dim);text-decoration:none}
 main{max-width:820px;margin:0 auto;padding:120px 24px 40px}
 h1{font-size:clamp(28px,5vw,44px);line-height:1.15;letter-spacing:-.02em;margin-bottom:16px}
@@ -58,10 +49,7 @@ table{width:100%%;border-collapse:collapse;margin:18px 0;font-size:.95rem}th,td{
 .faq h3{font-size:1.08rem;margin:22px 0 6px}.faq p{color:var(--text2)}
 .cta-row{margin:26px 0}
 .related{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.related a{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:8px 14px;color:var(--text);font-size:.9rem}
-footer{border-top:1px solid var(--border);margin-top:50px}.footer-inner{max-width:1100px;margin:0 auto;padding:30px 24px;text-align:center}
-.footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}.footer-links a{color:var(--text2);font-size:.9rem}
-.copyright{color:var(--text3);font-size:.85rem}
-@media (max-width:768px){.nav-links{display:none}}"""
+"""
 
 
 def strip_tags(s):
@@ -116,15 +104,12 @@ def render(p):
 <script type="application/ld+json">
 {json.dumps(faq_ld, ensure_ascii=False, indent=1)}
 </script>
+<!-- site-head:start -->
+<!-- site-head:end -->
 </head>
 <body>
-<nav><div class="nav-inner">
-  <a href="{app['home']}" class="logo"><span class="logo-text">{app['logo']}</span></a>
-  <ul class="nav-links"><li><a href="{app['home']}">Home</a></li><li><a href="{app['support']}">Support</a></li><li><a href="{app['store']}" class="btn">Get the App</a></li></ul>
-<!-- app-menu:start -->
-{MENU}
-<!-- app-menu:end -->
-</div></nav>
+<!-- site-header:start -->
+<!-- site-header:end -->
 <main>
   <h1>{p['h1']}</h1>
   <p class="sub">{p['sub']}</p>
@@ -143,10 +128,8 @@ def render(p):
 {related}
   </div>
 </main>
-<footer><div class="footer-inner">
-  <div class="footer-links"><a href="{app['home']}">{app['home_label']}</a><a href="{app['privacy']}">Privacy</a><a href="{app['terms']}">Terms</a><a href="{app['support']}">Support</a></div>
-  <p class="copyright">&copy; 2026 B2Gaudio. All rights reserved.</p>
-</div></footer>
+<!-- site-footer:start -->
+<!-- site-footer:end -->
 </body>
 </html>
 """
@@ -618,6 +601,6 @@ for p in pages:
     (SITE / p["file"]).write_text(render(p))
     print("wrote", p["file"])
 
-# Re-apply App Store campaign tags; render() emits untagged store links.
+# Fill in the shared header/footer and re-apply App Store campaign tags (render() emits neither).
 import subprocess, sys
-subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name("tag_store_links.py"))], check=True)
+subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name("build_chrome.py"))], check=True)

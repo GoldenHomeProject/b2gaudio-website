@@ -1,0 +1,288 @@
+/* Shared site chrome: header (.sh), footer (.sf), "More apps" strip (.sm) and the apps hub (.hub).
+   The markup is written into every page by tools/build_chrome.py from tools/apps.json.
+   CSS-only changes need no rebuild.
+
+   Every page also has its own older <style> with bare element rules (nav, footer, section,
+   h2, p, a, ul, li). Everything below is scoped to a class and sets the properties those
+   rules touch, so the chrome looks the same on every page whatever the page's own CSS says. */
+
+html { scroll-padding-top: 84px; }
+
+.sh, .sf, .sm, .hub {
+    --c-bg: #0A0A0F; --c-surface: #151520; --c-surface2: #1E1E2E;
+    --c-text: #F5F5F7; --c-text2: #A1A1AA; --c-text3: #71717A; --c-border: #2A2A3A;
+    --c-gold: #E9B949;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.45; -webkit-font-smoothing: antialiased; text-align: left;
+}
+.sh *, .sf *, .sm *, .hub * { box-sizing: border-box; }
+.sh a, .sf a, .sm a, .hub a, .sh a:hover, .sf a:hover, .sm a:hover, .hub a:hover { text-decoration: none; }
+.sh nav, .sf nav {
+    position: static; top: auto; width: auto; z-index: auto;
+    background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.sh ul, .sf ul { list-style: none; margin: 0; padding: 0; }
+.sh li, .sf li { margin: 0; padding: 0; }
+.sh summary, .sm summary { list-style: none; }
+.sh summary::-webkit-details-marker { display: none; }
+.sh-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sh :focus-visible, .sf :focus-visible, .sm :focus-visible, .hub :focus-visible {
+    outline: 2px solid var(--sh-accent, var(--c-gold)); outline-offset: 2px; border-radius: 8px;
+}
+
+/* App icons sit on a near-black page and some (B2Gaudio) are near-black themselves: a hairline keeps their shape. */
+.sh-app img, .sh-applink img, .sh-menu-h img, .sf-app-h img, .sm-card img, .hub-card-top img { box-shadow: 0 0 0 1px rgba(255,255,255,.10); }
+
+/* ---------- Header ---------- */
+.sh {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 64px;
+    background: rgba(10, 10, 15, .9);
+    -webkit-backdrop-filter: saturate(1.4) blur(20px); backdrop-filter: saturate(1.4) blur(20px);
+    border-bottom: 1px solid var(--c-border); color: var(--c-text);
+}
+.sh-bar {
+    max-width: 1160px; height: 100%; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; gap: 4px;
+}
+.sh-studio {
+    display: flex; align-items: center; gap: 10px; flex: none;
+    color: var(--c-text); font-size: .95rem; font-weight: 650; letter-spacing: -.01em; white-space: nowrap;
+    padding: 6px 8px 6px 0;
+}
+.sh-studio:hover { color: #fff; }
+.sh-mark { width: 30px; height: 30px; display: block; flex: none; border-radius: 8px; }
+
+.sh-apps { position: relative; flex: none; margin-left: 6px; }
+.sh-apps > summary {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    padding: 8px 12px; border-radius: 9px;
+    color: var(--c-text2); font-size: .9rem; font-weight: 500;
+}
+.sh-apps > summary:hover, .sh-apps[open] > summary { color: var(--c-text); background: rgba(255,255,255,.06); }
+.sh-caret { width: 10px; height: 10px; transition: transform .2s; }
+.sh-apps[open] .sh-caret { transform: rotate(180deg); }
+.sh-apps-panel {
+    position: absolute; top: calc(100% + 12px); left: 0; width: 360px; padding: 8px;
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.55);
+}
+.sh-applink {
+    display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px;
+    color: var(--c-text);
+}
+.sh-applink:hover { background: rgba(255,255,255,.06); }
+.sh-applink[aria-current] { background: rgba(255,255,255,.05); box-shadow: inset 3px 0 0 var(--a); }
+.sh-applink img { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+.sh-applink b { display: block; font-size: .95rem; font-weight: 600; color: var(--c-text); }
+.sh-applink small { display: block; font-size: .8rem; line-height: 1.35; color: var(--c-text2); }
+.sh-all {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px; padding: 12px 10px 6px; border-top: 1px solid var(--c-border);
+    color: var(--c-text2); font-size: .85rem; font-weight: 500;
+}
+.sh-all:hover { color: var(--c-text); }
+
+.sh-badge {
+    display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+    border: 1px solid rgba(233,185,73,.45); color: var(--c-gold);
+    font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    vertical-align: 2px; line-height: 1.6; white-space: nowrap;
+}
+
+.sh-div { width: 1px; height: 26px; background: var(--c-border); margin: 0 12px 0 8px; flex: none; }
+.sh-app {
+    display: flex; align-items: center; gap: 9px; min-width: 0;
+    color: var(--c-text); font-size: 1.02rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+}
+.sh-app:hover { color: #fff; }
+.sh-app img { width: 30px; height: 30px; border-radius: 7px; flex: none; }
+.sh-app span { overflow: hidden; text-overflow: ellipsis; }
+
+.sh-links { display: flex; align-items: center; gap: 2px; margin-left: 14px; }
+.sh-links a {
+    padding: 8px 10px; border-radius: 8px;
+    color: var(--c-text2); font-size: .9rem; font-weight: 500; white-space: nowrap;
+}
+.sh-links a:hover { color: var(--c-text); background: rgba(255,255,255,.05); }
+.sh-links a[aria-current] { color: var(--c-text); box-shadow: inset 0 -2px 0 var(--sh-accent); border-radius: 8px 8px 0 0; }
+
+.sh-spacer { flex: 1 1 auto; min-width: 8px; }
+.sh-cta {
+    display: inline-flex; align-items: center; gap: 7px; flex: none;
+    padding: 9px 16px; border-radius: 999px;
+    background: var(--sh-accent); color: var(--sh-accent-text, #fff);
+    font-size: .88rem; font-weight: 650; white-space: nowrap; line-height: 1.2;
+    transition: filter .15s, transform .15s;
+}
+.sh-cta:hover { color: var(--sh-accent-text, #fff); filter: brightness(1.1); }
+.sh-cta svg { width: 15px; height: 15px; fill: currentColor; flex: none; }
+.sh-soon {
+    flex: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--c-border);
+    color: var(--c-text2); font-size: .8rem; font-weight: 600; white-space: nowrap;
+}
+
+/* Mobile menu: a <details> disclosure, so it opens and closes with no JavaScript at all. */
+.sh-menu { display: none; flex: none; margin-left: 8px; }
+.sh-menu > summary {
+    display: flex; flex-direction: column; justify-content: center; gap: 5px; cursor: pointer;
+    width: 42px; height: 40px; padding: 0 10px;
+    border: 1px solid var(--c-border); border-radius: 10px;
+}
+.sh-menu > summary:hover { border-color: var(--c-text3); }
+.sh-menu > summary > i {
+    display: block; height: 2px; width: 100%; border-radius: 2px; background: var(--c-text);
+    transition: transform .25s, opacity .2s;
+}
+.sh-menu[open] > summary > i:nth-child(2) { transform: translateY(7px) rotate(45deg); }
+.sh-menu[open] > summary > i:nth-child(3) { opacity: 0; }
+.sh-menu[open] > summary > i:nth-child(4) { transform: translateY(-7px) rotate(-45deg); }
+.sh-menu-panel {
+    position: absolute; top: 100%; left: 0; right: 0;
+    max-height: calc(100vh - 64px); overflow-y: auto; overscroll-behavior: contain;
+    padding: 6px 20px 24px; background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border); box-shadow: 0 30px 60px rgba(0,0,0,.6);
+}
+.sh-menu-h {
+    display: flex; align-items: center; gap: 8px;
+    padding: 18px 0 6px; color: var(--c-text3);
+    font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+}
+.sh-menu-h img { width: 18px; height: 18px; border-radius: 5px; }
+.sh-menu-links a {
+    display: block; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+    color: var(--c-text); font-size: 1rem; font-weight: 500;
+}
+.sh-menu-links a[aria-current] { color: var(--sh-accent); }
+.sh-menu-links .sh-cta { display: flex; justify-content: center; margin-top: 16px; padding: 13px 16px; border: 0; font-size: .95rem; color: var(--sh-accent-text, #fff); }
+.sh-menu .sh-applink { padding: 10px 0; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.sh-menu .sh-applink[aria-current] { background: none; box-shadow: none; }
+.sh-menu .sh-applink[aria-current] b { color: var(--a); }
+.sh-menu .sh-all { border-top: 0; padding: 14px 0 0; }
+
+@media (max-width: 959px) {
+    .sh-apps, .sh-links { display: none; }
+    .sh-menu { display: block; }
+    .sh-app-page .sh-studio-name { display: none; }
+    .sh-app-page .sh-div { margin: 0 10px 0 2px; }
+}
+@media (max-width: 420px) {
+    .sh-bar { padding: 0 14px; }
+    .sh-app-page .sh-div, .sh-soon { display: none; }
+    .sh-app { margin-left: 8px; gap: 8px; }
+    .sh-cta-long { display: none; }
+    .sh-cta { padding: 9px 13px; }
+    .sh-app { font-size: .98rem; }
+}
+@media (min-width: 421px) { .sh-cta-short { display: none; } }
+
+/* ---------- Footer ---------- */
+.sf {
+    display: block; margin: 0; padding: 56px 20px 32px;
+    background: #08080C; border-top: 1px solid var(--c-border);
+    color: var(--c-text2); font-size: .9rem; text-align: left;
+}
+.sf-inner { max-width: 1160px; margin: 0 auto; }
+.sf-top { display: flex; flex-wrap: wrap; gap: 40px; }
+.sf-brand { flex: 1 1 220px; max-width: 300px; }
+.sf-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--c-text); font-weight: 650; font-size: 1rem; }
+.sf-brand p { margin: 12px 0 14px; padding: 0; color: var(--c-text2); font-size: .88rem; line-height: 1.5; }
+.sf-brand-links a { display: inline-block; margin-right: 16px; color: var(--c-text2); font-size: .88rem; }
+.sf-brand-links a:hover { color: var(--c-text); }
+.sf-apps { flex: 3 1 560px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 24px; }
+.sf-app-h {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; padding: 0;
+    color: var(--c-text); font-size: .92rem; font-weight: 650;
+}
+.sf-app-h a { color: var(--c-text); display: inline-flex; align-items: center; gap: 8px; }
+.sf-app-h img { width: 22px; height: 22px; border-radius: 6px; }
+.sf-app-h .sh-badge { margin-left: 0; }
+.sf-app li a { display: inline-block; padding: 4px 0; color: var(--c-text2); font-size: .88rem; }
+.sf-app li a:hover { color: var(--c-text); }
+.sf-bottom {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+    margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--c-border);
+}
+.sf .copyright { margin: 0; padding: 0; color: var(--c-text3); font-size: .84rem; }
+.sf-bottom a { color: var(--c-text3); font-size: .84rem; margin-left: 16px; }
+.sf-bottom a:first-child { margin-left: 0; }
+.sf-bottom a:hover { color: var(--c-text); }
+@media (max-width: 600px) {
+    .sf { padding: 44px 20px 28px; }
+    .sf-apps { grid-template-columns: 1fr 1fr; flex-basis: 100%; }
+    .sf-brand { max-width: none; }
+}
+
+/* ---------- "More apps" strip (app home pages) ---------- */
+.sm { display: block; margin: 0; padding: 72px 20px; border-top: 1px solid var(--c-border); background: none; text-align: left; }
+.sm-inner { max-width: 1100px; margin: 0 auto; }
+.sm-h { margin: 0 0 8px; padding: 0; color: var(--c-text); font-size: 1.7rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; text-align: center; }
+.sm-sub { margin: 0 auto 32px; padding: 0; max-width: 560px; color: var(--c-text2); font-size: 1rem; text-align: center; }
+.sm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.sm-card {
+    display: flex; gap: 14px; align-items: flex-start; padding: 18px;
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 16px;
+    color: var(--c-text); transition: border-color .2s, transform .2s;
+}
+.sm-card:hover { border-color: var(--a); transform: translateY(-2px); }
+.sm-card img { width: 52px; height: 52px; border-radius: 12px; flex: none; }
+.sm-card b { display: block; color: var(--c-text); font-size: 1.02rem; font-weight: 650; margin-bottom: 2px; }
+.sm-card small { display: block; color: var(--c-text2); font-size: .88rem; line-height: 1.45; }
+.sm-card .sm-more { display: inline-block; margin-top: 8px; color: var(--a); font-size: .85rem; font-weight: 600; }
+.sm-all { display: block; width: max-content; margin: 26px auto 0; color: var(--c-text2); font-size: .92rem; font-weight: 500; }
+.sm-all:hover { color: var(--c-text); }
+
+/* ---------- Apps hub (/apps.html) ---------- */
+.hub { max-width: 1100px; margin: 0 auto; padding: 128px 20px 72px; color: var(--c-text); }
+.hub-hero { text-align: center; margin: 0 auto 48px; max-width: 680px; }
+.hub-hero img { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 22px; display: block; box-shadow: 0 18px 50px rgba(233,185,73,.18); }
+.hub-hero h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; color: var(--c-text); }
+.hub-hero p { margin: 0; color: var(--c-text2); font-size: 1.1rem; line-height: 1.6; }
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.hub-card {
+    position: relative; display: flex; flex-direction: column; padding: 26px;
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 20px; overflow: hidden;
+}
+.hub-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--a); }
+.hub-card-top { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.hub-card-top img { width: 68px; height: 68px; border-radius: 16px; flex: none; }
+.hub-card h2 { margin: 0 0 4px; padding: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; color: var(--c-text); line-height: 1.2; }
+.hub-status { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; color: var(--c-text2); }
+.hub-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #34C759; }
+.hub-status.soon { color: var(--c-gold); }
+.hub-status.soon::before { background: var(--c-gold); }
+.hub-tagline { margin: 0 0 8px; color: var(--a); font-weight: 600; font-size: 1rem; }
+.hub-summary { margin: 0 0 10px; color: var(--c-text2); font-size: .95rem; line-height: 1.6; }
+.hub-platform { margin: 0 0 20px; color: var(--c-text3); font-size: .82rem; }
+.hub-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
+.hub-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 999px;
+    font-size: .9rem; font-weight: 650; line-height: 1.2;
+}
+.hub-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.hub-btn.primary { background: var(--a); color: var(--at, #fff); }
+.hub-btn.primary:hover { filter: brightness(1.1); color: var(--at, #fff); }
+.hub-btn.ghost { border: 1px solid var(--c-border); color: var(--c-text); }
+.hub-btn.ghost:hover { border-color: var(--a); color: var(--c-text); }
+.hub-btn.disabled { border: 1px dashed var(--c-border); color: var(--c-text3); cursor: default; }
+.hub-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 18px 0 0; padding: 16px 0 0; border-top: 1px solid var(--c-border); }
+.hub-links a { color: var(--c-text2); font-size: .85rem; }
+.hub-links a:hover { color: var(--c-text); }
+.hub-note { margin: 40px auto 0; max-width: 620px; text-align: center; color: var(--c-text3); font-size: .9rem; }
+.hub-note a { color: var(--c-text2); text-decoration: underline; }
+@media (max-width: 420px) {
+    .hub { padding-top: 104px; }
+    .hub-card { padding: 22px; }
+    .hub-grid { grid-template-columns: 1fr; }
+}
+
+/* Smallest phones (320-360px): the Get button keeps its icon and accessible name, drops the word,
+   so the app's name has room. */
+@media (max-width: 360px) {
+    .sh-cta-short { display: none; }
+    .sh-cta { padding: 9px 11px; }
+    .sh-bar { padding: 0 10px; gap: 2px; }
+    .sh-spacer { min-width: 0; }
+    .sh-app img { width: 28px; height: 28px; }
+    .sh-app { font-size: .92rem; margin-left: 6px; }
+    .sh-menu { margin-left: 6px; }
+}
