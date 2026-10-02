@@ -46,24 +46,25 @@ html { scroll-padding-top: 84px; }
 }
 /* "All apps" (link to the hub) + a caret that opens the quick app switcher, drawn as one split control. */
 .sh-lead {
-    position: relative; display: flex; align-items: stretch; flex: none; height: 38px;
-    border: 1px solid var(--c-border); border-radius: 10px;
+    position: relative; display: flex; align-items: stretch; flex: none; height: 40px;
+    border: 1px solid rgba(255,255,255,.22); border-radius: 10px;
+    background: rgba(255,255,255,.07);
 }
 .sh-home {
-    display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 9px;
-    color: var(--c-text2); font-size: .9rem; font-weight: 600; white-space: nowrap;
+    display: flex; align-items: center; gap: 9px; padding: 0 14px; border-radius: 9px;
+    color: var(--c-text); font-size: 1rem; font-weight: 600; white-space: nowrap;
 }
-.sh-home:hover, .sh-home[aria-current] { color: var(--c-text); background: rgba(255,255,255,.06); }
-.sh-grid { width: 16px; height: 16px; flex: none; fill: currentColor; display: block; }
+.sh-home:hover, .sh-home[aria-current] { color: #fff; background: rgba(255,255,255,.10); }
+.sh-grid { width: 20px; height: 20px; flex: none; fill: currentColor; display: block; }
 
 .sh-apps { position: static; display: flex; flex: none; }
 .sh-apps > summary {
     display: flex; align-items: center; justify-content: center; cursor: pointer;
-    width: 34px; border-left: 1px solid var(--c-border); border-radius: 0 9px 9px 0;
-    color: var(--c-text2);
+    width: 38px; border-left: 1px solid rgba(255,255,255,.22); border-radius: 0 9px 9px 0;
+    color: var(--c-text);
 }
 .sh-apps > summary:hover, .sh-apps[open] > summary { color: var(--c-text); background: rgba(255,255,255,.06); }
-.sh-caret { width: 10px; height: 10px; transition: transform .2s; }
+.sh-caret { width: 12px; height: 12px; transition: transform .2s; }
 .sh-apps[open] .sh-caret { transform: rotate(180deg); }
 .sh-apps-panel {
     position: absolute; top: calc(100% + 12px); left: 0; width: 360px; padding: 8px;
