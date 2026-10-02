@@ -19,8 +19,9 @@ its campaign (same rule as tools/tag_store_links.py, which is still worth runnin
 
 Guides are found, not listed: every page that matches an app's "pages" globs and is not its home,
 support, privacy or terms page is a guide. Title = the page's <h1>; one-liner = the first sentence of its
-meta description; order = the order the app's home page links to them (new ones go last). Adding a guide
-page and re-running this script puts it in the home page's "Guides & help" and gives it a breadcrumb.
+meta description; order and short labels (breadcrumbs) = the app's optional "guides" list in apps.json,
+with unlisted guides last, labelled by their <h1>. Adding a guide page and re-running this script puts it
+in the home page's "Guides & help" and gives it a breadcrumb.
 
 Idempotent: blocks are rewritten in place, so running it twice changes nothing. A page without markers
 is migrated once (old <nav>/<footer> become the header/footer blocks; the other blocks are inserted at
@@ -135,14 +136,10 @@ def first_sentence(s: str) -> str:
 
 
 @lru_cache(maxsize=None)
-def home_links(app_id: str):
-    """{guide file: link text} in the order the app's home page links to them (outside the chrome)."""
+def curated(app_id: str):
+    """{guide file: short label} from the app's optional "guides" list in apps.json, in that order."""
     app = next(a for a in APPS if a["id"] == app_id)
-    src = ALL_BLOCKS.sub("", (ROOT / home_file(app)).read_text())
-    out = {}
-    for href, inner in re.findall(r'<a href="([^"#]+\.html)"[^>]*>(.*?)</a>', src, re.S):
-        out.setdefault(href.lstrip("/"), text_of(inner))
-    return out
+    return {f: short for f, short in app.get("guides", [])}
 
 
 def special_pages(app):
@@ -159,12 +156,15 @@ def guides_of(app_id: str):
                    if p.name not in special and p.name not in NOT_APP_PAGES
                    and not any(fnmatch.fnmatch(p.name, g) for g in SKIP)
                    and any(fnmatch.fnmatch(p.name, g) for g in app["pages"]))
-    order = list(home_links(app_id))
+    order = list(curated(app_id))
+    missing = [f for f in order if f not in files]
+    if missing:
+        sys.exit(f"build_chrome: apps.json lists guides that don't exist: {', '.join(missing)}")
     files.sort(key=lambda f: (order.index(f) if f in order else len(order), f))
     out = []
     for f in files:
         title, desc = page_meta(f)
-        out.append((f, title, first_sentence(desc), home_links(app_id).get(f) or title))
+        out.append((f, title, first_sentence(desc), curated(app_id).get(f) or title))
     return out
 
 
@@ -261,10 +261,13 @@ def render_help(page, app):
     links = "".join(f'<a class="sg-link" href="{h}">{DOC}{t}</a>' for t, h in
                     [("Support", app["support"]), ("Privacy Policy", app["privacy"]), ("Terms of Service", app["terms"])])
     heading = f'{esc(app["name"])} guides &amp; help' if guides else f'{esc(app["name"])} help'
-    sub = ("Step-by-step guides, plus support and the policies that cover the app." if guides
+    sub = (esc(app["guides_intro"]) if guides and app.get("guides_intro") else
+           "Step-by-step guides, plus support and the policies that cover the app." if guides
            else "Support and the policies that cover the app.")
     grid = f'<div class="sg-grid">\n{cards}\n</div>\n' if guides else ""
-    return (f'<section class="sg" id="{HELP_ID}" aria-labelledby="sg-h" style="--a:{app["accent"]}">\n'
+    # Old in-page anchors (e.g. drivemail.html#questions) that links elsewhere may still use.
+    anchors = "".join(f'<span class="sg-anchor" id="{a}"></span>' for a in app.get("help_anchors", []))
+    return (f'<section class="sg" id="{HELP_ID}" aria-labelledby="sg-h" style="--a:{app["accent"]}">{anchors}\n'
             f'<div class="sg-inner">\n<h2 class="sg-h" id="sg-h">{heading}</h2>\n<p class="sg-sub">{sub}</p>\n'
             f'{grid}<div class="sg-help">{links}</div>\n</div>\n</section>')
 

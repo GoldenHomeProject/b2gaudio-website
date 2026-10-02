@@ -34,9 +34,13 @@ missing ones itself. Everything outside the markers is the page's own and is nev
 
 **Guides are found, not listed.** Any page matching an app's `pages` globs that isn't its home, support,
 privacy or terms page is a guide. Its title is the page's `<h1>`, its one-liner is the first sentence of
-its meta description, and they are ordered the way the app's home page links to them (unlinked ones last).
-So to add a guide: create the page (with `<h1>`, meta description, and a `<main>` or
-`<div class="content">` for the breadcrumb to go in), then run `python3 tools/build_chrome.py`.
+its meta description. Optional per-app settings in `apps.json`: `guides` (a list of
+`[file, short label]` that fixes the order and gives each guide its short breadcrumb label; unlisted
+guides go last, labelled by their `<h1>`), `guides_intro` (the line under the section heading) and
+`help_anchors` (old in-page anchors such as `drivemail.html#questions` that should keep landing on the
+section). So to add a guide: create the page (with `<h1>`, meta description, and a `<main>` or
+`<div class="content">` for the breadcrumb to go in), optionally add it to that app's `guides` list,
+then run `python3 tools/build_chrome.py`.
 
 ## Adding a new app
 
