@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandemic — Make guy friends who actually show up</title>
+    <meta name="description" content="Mandemic is a free, platonic app for finding guys nearby to do real things with: pickleball, golf, concerts, hikes, trips. Coming soon to iPhone and Android.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #12201B;
+            --surface: #1B2C26;
+            --accent: #7CC4E4;
+            --sand: #E9D9AE;
+            --text: #EEF0E8;
+            --text2: #C9D3CB;
+            --text3: #93A59B;
+            --border: #2A3F37;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .content { max-width: 760px; margin: 0 auto; padding: 120px 24px 80px; }
+        .app-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 8px 16px; margin-bottom: 24px;
+        }
+        .app-badge img { width: 28px; height: 28px; border-radius: 7px; }
+        .app-badge span { font-size: 0.95rem; font-weight: 600; color: var(--text2); }
+        h1 { font-family: 'Anton', Impact, 'Arial Narrow Bold', sans-serif; font-weight: 400; font-size: 3.4rem; line-height: 1.05; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+        .tagline { color: var(--sand); font-size: 1.15rem; font-weight: 600; margin-bottom: 40px; }
+        h2 { font-size: 1.3rem; font-weight: 600; margin-top: 40px; margin-bottom: 12px; color: var(--accent); }
+        p { color: var(--text2); margin-bottom: 16px; font-size: 0.95rem; }
+        ul { color: var(--text2); margin-bottom: 16px; padding-left: 24px; font-size: 0.95rem; }
+        li { margin-bottom: 8px; }
+        strong { color: var(--text); }
+        a { color: var(--accent); }
+        .callout {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px 24px; margin: 24px 0;
+        }
+        .callout p:last-child { margin-bottom: 0; }
+        @media (max-width: 480px) {
+            h1 { font-size: 2.6rem; }
+        }
+    </style>
+<!-- site-head:start -->
+<link rel="stylesheet" href="site-chrome.css">
+<script src="site-chrome.js" defer></script>
+<link rel="icon" type="image/png" href="mandemic-icon.png">
+<!-- site-head:end -->
+</head>
+<body>
+
+<!-- site-header:start -->
+<header class="sh" style="--sh-accent:#7CC4E4;--sh-accent-text:#0E1A16">
+<div class="sh-bar">
+<nav class="sh-nav" aria-label="Our apps">
+<div class="sh-strip">
+<a class="sh-tab sh-tab-all" href="apps.html" aria-label="All apps"><svg class="sh-grid" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="6.5" height="6.5" rx="1.8"/><rect x="11.5" y="2" width="6.5" height="6.5" rx="1.8"/><rect x="2" y="11.5" width="6.5" height="6.5" rx="1.8"/><rect x="11.5" y="11.5" width="6.5" height="6.5" rx="1.8"/></svg><span class="sh-name">All apps</span></a>
+<a class="sh-tab" href="/" style="--a:#FF6B35"><img src="favicon.png" alt="" width="24" height="24"><span class="sh-name"><span class="sh-full">B2Gaudio</span><span class="sh-short" aria-hidden="true">B2Gaudio</span></span></a>
+<a class="sh-tab" href="drivemail.html" style="--a:#4A90D9"><img src="drivemail-logo.png" alt="" width="24" height="24"><span class="sh-name"><span class="sh-full">DriveMail Voice</span><span class="sh-short" aria-hidden="true">DriveMail</span></span></a>
+<a class="sh-tab" href="digitaldecks.html" style="--a:#2FA8FF"><img src="digitaldecks-icon.png" alt="" width="24" height="24"><span class="sh-name"><span class="sh-full">Digital Decks</span><span class="sh-short" aria-hidden="true">Decks</span></span></a>
+<a class="sh-tab" href="commonhealth.html" style="--a:#3FBF7F"><img src="commonhealth-icon.png" alt="" width="24" height="24"><span class="sh-name"><span class="sh-full">CommonHealth</span><span class="sh-short" aria-hidden="true">CommonHealth</span></span><span class="sh-pill">Soon</span></a>
+<a class="sh-tab is-current" href="mandemic.html" style="--a:#7CC4E4" aria-current="page"><img src="mandemic-icon.png" alt="" width="24" height="24"><span class="sh-name"><span class="sh-full">Mandemic</span><span class="sh-short" aria-hidden="true">Mandemic</span></span><span class="sh-pill">Soon</span></a>
+</div>
+</nav>
+<span class="sh-soon">Coming soon</span>
+</div>
+</header>
+<!-- site-header:end -->
+
+<div class="content">
+    <div class="app-badge">
+        <img src="mandemic-icon.png" alt="" width="28" height="28">
+        <span>Mandemic</span>
+    </div>
+
+    <h1>Mandemic</h1>
+    <p class="tagline">Your group chat called. It wants an actual plan.</p>
+
+    <div class="callout">
+        <p>After 30, the things that used to make friends for us (school, teams, living down the street) go away. Mandemic is a free, platonic app for finding guys near you who actually want to do stuff: pickleball at 7, a tee time Saturday, a show on a Thursday. You find a plan, you show up, you do it again. Not a dating app. Not social media.</p>
+    </div>
+
+    <h2>How it works</h2>
+    <ul>
+        <li><strong>Pick what you're into.</strong> Tap a few activities and the times you're usually free. Sign-up takes about a minute.</li>
+        <li><strong>Find a plan nearby.</strong> See what guys near you are doing, filtered by distance and your schedule. Or post your own and let others join.</li>
+        <li><strong>Get a crew.</strong> Small groups of 4 to 6 guys who meet again and again, because repeat time together is how strangers become friends.</li>
+        <li><strong>The app makes the plan.</strong> Every week or two it suggests your crew's next outing: something you all like, at a time that fits everyone.</li>
+        <li><strong>Split the cost.</strong> When an activity costs money, the organizer pays and the app sends everyone a request for their share.</li>
+    </ul>
+
+    <h2>Reliability, not popularity</h2>
+    <p>There are no likes, no followers and no ratings. The only score is whether you do what you said you'd do: show up, and pay your share. Cancel early and nothing happens. Cancel late or no-show and it counts. Everyone gets a "life happens" pass each month.</p>
+
+    <h2>Built to get you off your phone</h2>
+    <p>There is no feed to scroll. You open the app, find or confirm a plan, and go. The point is hours spent together in person, not hours in the app.</p>
+
+    <h2>Fair to everyone</h2>
+    <p>Mandemic matches guys on activities, distance and schedules. It never asks about or matches on race or ethnicity. Questions about faith or politics are optional, and only count if you say they matter to you. Your home address is never shown to anyone.</p>
+
+    <h2>Who it's for</h2>
+    <p>Any guy 18 or older who wants more friends to do things with. Dads, single guys, new-in-town guys, guys whose old friends are three states away. Every plan can be "kids welcome" or "guys only."</p>
+
+    <h2>When</h2>
+    <p>Mandemic is being designed now, for iPhone and Android. It will launch in one city first.</p>
+
+    <h2>Get in touch</h2>
+    <p><a href="mandemic-support.html">Support</a> &middot; <a href="mailto:b2gaudio@gmail.com">b2gaudio@gmail.com</a></p>
+</div>
+
+<!-- app-help:start -->
+<section class="sg" id="guides-help" aria-labelledby="sg-h" style="--a:#7CC4E4">
+<div class="sg-inner">
+<h2 class="sg-h" id="sg-h">Mandemic help</h2>
+<p class="sg-sub">Support and the policies that cover the app.</p>
+<div class="sg-help"><a class="sg-link" href="mandemic-support.html"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h6.5L15 6v11.5H5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.5 9.5h5M7.5 12.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Support</a><a class="sg-link" href="mandemic-privacy.html"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h6.5L15 6v11.5H5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.5 9.5h5M7.5 12.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Privacy Policy</a><a class="sg-link" href="mandemic-terms.html"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h6.5L15 6v11.5H5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.5 9.5h5M7.5 12.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Terms of Service</a></div>
+</div>
+</section>
+<!-- app-help:end -->
+
+<!-- more-apps:start -->
+<section class="sm" aria-labelledby="sm-h">
+<div class="sm-inner">
+<h2 class="sm-h" id="sm-h">More apps from us</h2>
+<p class="sm-sub">From the people who make Mandemic.</p>
+<div class="sm-grid">
+<a class="sm-card" href="/" style="--a:#FF6B35"><img src="favicon.png" alt="" width="52" height="52"><span><b>B2Gaudio</b><small>Music is. Better 2Gether.</small><span class="sm-more">Learn more &rarr;</span></span></a>
+<a class="sm-card" href="drivemail.html" style="--a:#4A90D9"><img src="drivemail-logo.png" alt="" width="52" height="52"><span><b>DriveMail Voice</b><small>Your emails, read aloud.</small><span class="sm-more">Learn more &rarr;</span></span></a>
+<a class="sm-card" href="digitaldecks.html" style="--a:#2FA8FF"><img src="digitaldecks-icon.png" alt="" width="52" height="52"><span><b>Digital Decks</b><small>Scan it. Collect it. Build a real deck.</small><span class="sm-more">Learn more &rarr;</span></span></a>
+<a class="sm-card" href="commonhealth.html" style="--a:#3FBF7F"><img src="commonhealth-icon.png" alt="" width="52" height="52"><span><b>CommonHealth<span class="sh-badge">Coming soon</span></b><small>Appeal a denied medical claim — entirely on your iPhone.</small><span class="sm-more">Learn more &rarr;</span></span></a>
+</div>
+<a class="sm-all" href="apps.html">See all apps &rarr;</a>
+</div>
+</section>
+<!-- more-apps:end -->
+
+<!-- site-footer:start -->
+<footer class="sf">
+<div class="sf-inner">
+<div class="sf-top">
+<div class="sf-brand"><a class="sf-brand-link" href="apps.html"><svg class="sh-grid" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="6.5" height="6.5" rx="1.8"/><rect x="11.5" y="2" width="6.5" height="6.5" rx="1.8"/><rect x="2" y="11.5" width="6.5" height="6.5" rx="1.8"/><rect x="11.5" y="11.5" width="6.5" height="6.5" rx="1.8"/></svg>All apps</a>
+<p>Every app we make, what it does, and where to get it.</p>
+<div class="sf-brand-links"><a href="mailto:b2gaudio@gmail.com">Contact us</a></div></div>
+<nav class="sf-apps" aria-label="Apps">
+<div class="sf-app" style="--a:#FF6B35"><p class="sf-app-h"><a href="/"><img src="favicon.png" alt="" width="22" height="22">B2Gaudio</a></p><ul><li><a href="/#guides-help">Guides</a></li><li><a href="support.html">Support</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms of Service</a></li><li><a href="https://apps.apple.com/app/apple-store/id6759938468?pt=128605371&amp;ct=web-mandemic&amp;mt=8">App Store</a></li></ul></div>
+<div class="sf-app" style="--a:#4A90D9"><p class="sf-app-h"><a href="drivemail.html"><img src="drivemail-logo.png" alt="" width="22" height="22">DriveMail Voice</a></p><ul><li><a href="drivemail.html#guides-help">Guides</a></li><li><a href="drivemail-support.html">Support</a></li><li><a href="drivemail-privacy.html">Privacy Policy</a></li><li><a href="drivemail-terms.html">Terms of Service</a></li><li><a href="https://apps.apple.com/app/apple-store/id6760625295?pt=128605371&amp;ct=web-mandemic&amp;mt=8">App Store</a></li></ul></div>
+<div class="sf-app" style="--a:#2FA8FF"><p class="sf-app-h"><a href="digitaldecks.html"><img src="digitaldecks-icon.png" alt="" width="22" height="22">Digital Decks</a></p><ul><li><a href="digitaldecks.html#guides-help">Guides</a></li><li><a href="digitaldecks-support.html">Support</a></li><li><a href="digitaldecks-privacy.html">Privacy Policy</a></li><li><a href="digitaldecks-terms.html">Terms of Service</a></li><li><a href="https://apps.apple.com/app/apple-store/id6794926765?pt=128605371&amp;ct=web-mandemic&amp;mt=8">App Store</a></li></ul></div>
+<div class="sf-app" style="--a:#3FBF7F"><p class="sf-app-h"><a href="commonhealth.html"><img src="commonhealth-icon.png" alt="" width="22" height="22">CommonHealth</a><span class="sh-badge">Coming soon</span></p><ul><li><a href="commonhealth-support.html">Support</a></li><li><a href="commonhealth-privacy.html">Privacy Policy</a></li><li><a href="commonhealth-terms.html">Terms of Service</a></li></ul></div>
+<div class="sf-app" style="--a:#7CC4E4"><p class="sf-app-h"><a href="mandemic.html" aria-current="page"><img src="mandemic-icon.png" alt="" width="22" height="22">Mandemic</a><span class="sh-badge">Coming soon</span></p><ul><li><a href="mandemic-support.html">Support</a></li><li><a href="mandemic-privacy.html">Privacy Policy</a></li><li><a href="mandemic-terms.html">Terms of Service</a></li></ul></div>
+</nav>
+</div>
+<div class="sf-bottom"><p class="copyright">&copy; 2026 B2Gaudio. All rights reserved.</p><div><a href="apps.html">All apps</a><a href="mailto:b2gaudio@gmail.com">b2gaudio@gmail.com</a></div></div>
+</div>
+</footer>
+<!-- site-footer:end -->
+
+</body>
+</html>

@@ -3,7 +3,7 @@
   "site": {
     "hub": "apps.html",
     "hub_title": "Our Apps",
-    "hub_description": "All our iPhone apps in one place: B2Gaudio, DriveMail Voice, Digital Decks and CommonHealth. What each one does, and where to get it.",
+    "hub_description": "All our apps in one place: B2Gaudio, DriveMail Voice, Digital Decks, CommonHealth and Mandemic. What each one does, and where to get it.",
     "base_url": "https://b2gaudio.com/",
     "contact_email": "b2gaudio@gmail.com",
     "copyright": "&copy; 2026 B2Gaudio. All rights reserved."
@@ -109,6 +109,23 @@
       "terms": "commonhealth-terms.html",
       "app_store_id": "6795086349",
       "pages": ["commonhealth.html", "commonhealth-*.html"]
+    },
+    {
+      "id": "mandemic",
+      "name": "Mandemic",
+      "short": "Mandemic",
+      "icon": "mandemic-icon.png",
+      "accent": "#7CC4E4",
+      "accent_text": "#0E1A16",
+      "status": "coming_soon",
+      "tagline": "Your group chat called. It wants an actual plan.",
+      "summary": "A free, platonic app for finding guys near you who actually want to do stuff: pickleball at 7, a tee time Saturday, a show on a Thursday. Not a dating app. Not social media.",
+      "platform": "iPhone and Android",
+      "home": "mandemic.html",
+      "support": "mandemic-support.html",
+      "privacy": "mandemic-privacy.html",
+      "terms": "mandemic-terms.html",
+      "pages": ["mandemic.html", "mandemic-*.html"]
     }
   ]
 }
