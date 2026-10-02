@@ -5,7 +5,7 @@
 
 Reads tools/apps.json and, for every *.html page at the site root:
   * the <head> block   (<!-- site-head:start/end -->)   site-chrome.css + .js, and a favicon if the page has none
-  * the header         (<!-- site-header:start/end -->) studio mark -> apps hub, Apps menu, the page's app
+  * the header         (<!-- site-header:start/end -->) "All apps" -> hub, app switcher, the page's app
                                                          (icon + name, Home/Guides/Support/Privacy, Get the app)
   * the footer         (<!-- site-footer:start/end -->) every app's links, the hub, contact, copyright
   * on each app's home page, a "More apps" strip (<!-- more-apps:start/end -->)
@@ -17,7 +17,7 @@ markers yet is migrated once: its old <nav>...</nav> becomes the header block an
 <footer>...</footer> becomes the footer block. Everything else on the page is left byte-for-byte alone.
 
 Which app a page belongs to comes from each app's "pages" globs in apps.json. A page that matches
-no app gets the studio header (hub pages); the script refuses to guess for anything else.
+no app gets the neutral header (the hub); the script refuses to guess for anything else.
 """
 from __future__ import annotations
 
@@ -37,10 +37,11 @@ DATA = json.loads((Path(__file__).with_name("apps.json")).read_text())
 SITE, APPS = DATA["site"], DATA["apps"]
 HUB = SITE["hub"]
 
-MARK = "studio-mark.svg"
+HUB_ICON = "apps-icon.svg"                               # neutral favicon for the hub
+HUB_OG = "og-apps.png"                                   # 1200x630, rendered from og-builder/apps-og.html
 STORE = "https://apps.apple.com/app/apple-store/id{}"   # tag_store_links.py adds pt/ct/mt
 SKIP = ("google*.html", "_*.html")                       # verification file, fragments
-NOT_APP_PAGES = {HUB}                                    # pages that belong to the studio, not an app
+NOT_APP_PAGES = {HUB}                                    # pages that belong to no single app
 
 APPLE = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79'
          '-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 '
@@ -49,6 +50,9 @@ APPLE = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.71 19.5c-.83 
          '1.05-3.11z"/></svg>')
 CARET = ('<svg class="sh-caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" '
          'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>')
+GRID = ('<svg class="sh-grid" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="6.5" height="6.5" rx="1.8"/>'
+        '<rect x="11.5" y="2" width="6.5" height="6.5" rx="1.8"/><rect x="2" y="11.5" width="6.5" height="6.5" rx="1.8"/>'
+        '<rect x="11.5" y="11.5" width="6.5" height="6.5" rx="1.8"/></svg>')
 
 esc = lambda s: html.escape(s, quote=True)
 
@@ -121,11 +125,11 @@ def cta(app):
 
 
 def render_header(page, app):
-    studio = (f'<a class="sh-studio" href="{HUB}" aria-label="{esc(SITE["studio"])}: all apps"{current(HUB, page)}>'
-              f'<img class="sh-mark" src="{MARK}" alt="" width="30" height="30">'
-              f'<span class="sh-studio-name">{esc(SITE["studio"])}</span></a>')
-    apps_menu = (f'<details class="sh-apps"><summary>Apps {CARET}</summary>\n'
-                 f'<div class="sh-apps-panel">\n{applinks(app)}\n</div></details>')
+    # "All apps" goes to the hub; the caret beside it opens a quick app switcher (not needed on the hub itself).
+    home = (f'<a class="sh-home" href="{HUB}" aria-label="All apps"{current(HUB, page)}>{GRID}'
+            f'<span class="sh-home-label">All apps</span></a>')
+    apps_menu = (f'<details class="sh-apps"><summary><span class="sh-vh">Switch app</span>{CARET}</summary>\n'
+                 f'<div class="sh-apps-panel">\n{applinks(app)}\n</div></details>') if app else ""
     if app is None:
         style, cls = "", "sh sh-hub"
         middle = '<span class="sh-spacer"></span>'
@@ -150,7 +154,8 @@ def render_header(page, app):
             f'<div class="sh-menu-panel">\n{menu_app}'
             f'<div class="sh-menu-h">All apps</div>\n<nav aria-label="All apps">\n{applinks(app)}\n</nav>\n'
             f'</div></details>')
-    return (f'<header class="{cls}"{style}>\n<div class="sh-bar">\n{studio}\n{apps_menu}\n{middle}\n{menu}\n'
+    lead = f'<div class="sh-lead">{home}{apps_menu}</div>'
+    return (f'<header class="{cls}"{style}>\n<div class="sh-bar">\n{lead}\n{middle}\n{menu}\n'
             f'</div>\n</header>')
 
 
@@ -170,10 +175,9 @@ def render_footer(page, app):
             f'{esc(a["name"])}</a>{badge(a)}</p><ul>{lis}</ul></div>')
     mail = SITE["contact_email"]
     return (f'<footer class="sf">\n<div class="sf-inner">\n<div class="sf-top">\n'
-            f'<div class="sf-brand"><a class="sf-brand-link" href="{HUB}"><img class="sh-mark" src="{MARK}" alt="" '
-            f'width="30" height="30">{esc(SITE["studio"])}</a>\n'
+            f'<div class="sf-brand"><a class="sf-brand-link" href="{HUB}">{GRID}All apps</a>\n'
             f'<p>Every app we make, what it does, and where to get it.</p>\n'
-            f'<div class="sf-brand-links"><a href="{HUB}">All apps</a><a href="mailto:{mail}">Contact</a></div></div>\n'
+            f'<div class="sf-brand-links"><a href="mailto:{mail}">Contact us</a></div></div>\n'
             f'<nav class="sf-apps" aria-label="Apps">\n' + "\n".join(cols) + '\n</nav>\n</div>\n'
             f'<div class="sf-bottom"><p class="copyright">{SITE["copyright"]}</p>'
             f'<div><a href="{HUB}">All apps</a><a href="mailto:{mail}">{mail}</a></div></div>\n'
@@ -188,7 +192,7 @@ def render_more(page, app):
         f'<span><b>{esc(a["name"])}{badge(a)}</b><small>{esc(a["tagline"])}</small>'
         f'<span class="sm-more">Learn more &rarr;</span></span></a>' for a in others)
     return (f'<section class="sm" aria-labelledby="sm-h">\n<div class="sm-inner">\n'
-            f'<h2 class="sm-h" id="sm-h">More apps from {esc(SITE["studio"])}</h2>\n'
+            f'<h2 class="sm-h" id="sm-h">More apps from us</h2>\n'
             f'<p class="sm-sub">From the people who make {esc(app["name"])}.</p>\n'
             f'<div class="sm-grid">\n{cards}\n</div>\n'
             f'<a class="sm-all" href="{HUB}">See all apps &rarr;</a>\n</div>\n</section>')
@@ -198,7 +202,7 @@ def render_head(page, app, page_html):
     out = ['<link rel="stylesheet" href="site-chrome.css">', '<script src="site-chrome.js" defer></script>']
     if 'rel="icon"' not in page_html:             # several legal pages never had one
         if app is None:
-            out.append(f'<link rel="icon" type="image/svg+xml" href="{MARK}">')
+            out.append(f'<link rel="icon" type="image/svg+xml" href="{HUB_ICON}">')
         else:
             out.append(f'<link rel="icon" type="image/png" href="{app["icon"]}">')
     return "\n".join(out)
@@ -233,7 +237,6 @@ def render_hub():
     ld = {
         "@context": "https://schema.org", "@type": "CollectionPage",
         "name": SITE["hub_title"], "url": base + HUB, "description": SITE["hub_description"],
-        "publisher": {"@type": "Organization", "name": SITE["studio"]},
         "mainEntity": {"@type": "ItemList", "itemListElement": [
             {"@type": "ListItem", "position": i, "name": a["name"],
              "url": base + (a["home"].lstrip("/"))} for i, a in enumerate(APPS, 1)]},
@@ -249,16 +252,18 @@ def render_hub():
 <meta name="description" content="{esc(desc)}">
 <link rel="canonical" href="{base}{HUB}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="{esc(SITE['studio'])}">
+<meta property="og:site_name" content="{esc(title)}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:url" content="{base}{HUB}">
-<meta property="og:image" content="{base}studio-mark.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="{base}{HUB_OG}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{esc(title)}: {esc(', '.join(a['name'] for a in APPS))}">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{esc(title)}">
 <meta name="twitter:description" content="{esc(desc)}">
-<meta name="twitter:image" content="{base}studio-mark.png">
-<link rel="apple-touch-icon" href="studio-mark.png">
+<meta name="twitter:image" content="{base}{HUB_OG}">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 body{{background:#0A0A0F;color:#F5F5F7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}}
@@ -274,7 +279,7 @@ body{{background:#0A0A0F;color:#F5F5F7;font-family:-apple-system,BlinkMacSystemF
 {end('site-header')}
 <main class="hub">
   <div class="hub-hero">
-    <img src="{MARK}" alt="" width="64" height="64">
+    <div class="hub-icons" aria-hidden="true">{''.join(f'<img src="{a["icon"]}" alt="" width="56" height="56">' for a in APPS)}</div>
     <h1>{esc(title)}</h1>
     <p>Every app we make, in one place: what each one does, and where to get it.</p>
   </div>

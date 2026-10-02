@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<!-- Renders /og-apps.png (1200x630), the social card for /apps.html. See og-builder/README.md. -->
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1200px; height:630px; }
+  body{
+    background:#0A0A0F; color:#F5F5F7; overflow:hidden; position:relative;
+    font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  }
+  .glow{ position:absolute; border-radius:50%; filter:blur(10px); }
+  .g1{ width:520px; height:520px; left:-120px; top:-200px; background:radial-gradient(circle, rgba(255,107,53,.20), rgba(255,107,53,0) 68%); }
+  .g2{ width:520px; height:520px; left:330px; top:-260px; background:radial-gradient(circle, rgba(74,144,217,.18), rgba(74,144,217,0) 68%); }
+  .g3{ width:560px; height:560px; right:-140px; top:-190px; background:radial-gradient(circle, rgba(63,191,127,.16), rgba(63,191,127,0) 68%); }
+  .g4{ width:700px; height:500px; left:250px; bottom:-330px; background:radial-gradient(circle, rgba(47,168,255,.12), rgba(47,168,255,0) 70%); }
+  .wrap{ position:relative; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  h1{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:1; margin-bottom:58px; }
+  .row{ display:flex; gap:56px; }
+  .app{ width:190px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .app img{ width:150px; height:150px; border-radius:34px; display:block;
+            box-shadow:0 0 0 1.5px rgba(255,255,255,.12), 0 24px 50px rgba(0,0,0,.55); }
+  .app b{ display:block; margin-top:22px; font-size:25px; font-weight:700; letter-spacing:-.3px; white-space:nowrap; }
+  .app i{ display:inline-block; margin-top:9px; padding:3px 11px; border-radius:999px; font-style:normal;
+          font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+          color:#E9B949; border:1.5px solid rgba(233,185,73,.5); }
+  .url{ position:absolute; bottom:30px; left:0; right:0; text-align:center; color:#71717A; font-size:20px; font-weight:500; letter-spacing:.02em; }
+</style>
+</head>
+<body>
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div><div class="glow g4"></div>
+  <div class="wrap">
+    <h1>Our Apps</h1>
+    <div class="row">
+      <div class="app"><img src="../b2gaudio-app-icon.png" alt=""><b>B2Gaudio</b></div>
+      <div class="app"><img src="../drivemail-logo.png" alt=""><b>DriveMail Voice</b></div>
+      <div class="app"><img src="../digitaldecks-app-icon.png" alt=""><b>Digital Decks</b></div>
+      <div class="app"><img src="../commonhealth-icon.png" alt=""><b>CommonHealth</b><i>Coming soon</i></div>
+    </div>
+  </div>
+  <div class="url">b2gaudio.com/apps.html</div>
+</body>
+</html>

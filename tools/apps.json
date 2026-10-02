@@ -1,10 +1,9 @@
 {
   "_comment": "Single source of truth for the site chrome (header, footer, 'More apps' strip) and the /apps.html hub. Edit, then run: python3 tools/build_chrome.py  -- see tools/README.md. Every piece of copy here must already appear on the app's own page; do not invent claims.",
   "site": {
-    "studio": "Golden Home Project",
     "hub": "apps.html",
-    "hub_title": "Apps by Golden Home Project",
-    "hub_description": "Every iPhone app from Golden Home Project in one place: B2Gaudio, DriveMail Voice, Digital Decks and CommonHealth. What each one does, and where to get it.",
+    "hub_title": "Our Apps",
+    "hub_description": "All our iPhone apps in one place: B2Gaudio, DriveMail Voice, Digital Decks and CommonHealth. What each one does, and where to get it.",
     "base_url": "https://b2gaudio.com/",
     "contact_email": "b2gaudio@gmail.com",
     "copyright": "&copy; 2026 B2Gaudio. All rights reserved."

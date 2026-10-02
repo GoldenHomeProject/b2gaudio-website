@@ -44,19 +44,23 @@ html { scroll-padding-top: 84px; }
     max-width: 1160px; height: 100%; margin: 0 auto; padding: 0 20px;
     display: flex; align-items: center; gap: 4px;
 }
-.sh-studio {
-    display: flex; align-items: center; gap: 10px; flex: none;
-    color: var(--c-text); font-size: .95rem; font-weight: 650; letter-spacing: -.01em; white-space: nowrap;
-    padding: 6px 8px 6px 0;
+/* "All apps" (link to the hub) + a caret that opens the quick app switcher, drawn as one split control. */
+.sh-lead {
+    position: relative; display: flex; align-items: stretch; flex: none; height: 38px;
+    border: 1px solid var(--c-border); border-radius: 10px;
 }
-.sh-studio:hover { color: #fff; }
-.sh-mark { width: 30px; height: 30px; display: block; flex: none; border-radius: 8px; }
+.sh-home {
+    display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 9px;
+    color: var(--c-text2); font-size: .9rem; font-weight: 600; white-space: nowrap;
+}
+.sh-home:hover, .sh-home[aria-current] { color: var(--c-text); background: rgba(255,255,255,.06); }
+.sh-grid { width: 16px; height: 16px; flex: none; fill: currentColor; display: block; }
 
-.sh-apps { position: relative; flex: none; margin-left: 6px; }
+.sh-apps { position: static; display: flex; flex: none; }
 .sh-apps > summary {
-    display: flex; align-items: center; gap: 6px; cursor: pointer;
-    padding: 8px 12px; border-radius: 9px;
-    color: var(--c-text2); font-size: .9rem; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    width: 34px; border-left: 1px solid var(--c-border); border-radius: 0 9px 9px 0;
+    color: var(--c-text2);
 }
 .sh-apps > summary:hover, .sh-apps[open] > summary { color: var(--c-text); background: rgba(255,255,255,.06); }
 .sh-caret { width: 10px; height: 10px; transition: transform .2s; }
@@ -162,8 +166,9 @@ html { scroll-padding-top: 84px; }
 @media (max-width: 959px) {
     .sh-apps, .sh-links { display: none; }
     .sh-menu { display: block; }
-    .sh-app-page .sh-studio-name { display: none; }
-    .sh-app-page .sh-div { margin: 0 10px 0 2px; }
+    .sh-app-page .sh-home-label { display: none; }
+    .sh-app-page .sh-home { padding: 0 10px; }
+    .sh-app-page .sh-div { margin: 0 10px 0 6px; }
 }
 @media (max-width: 420px) {
     .sh-bar { padding: 0 14px; }
@@ -185,6 +190,7 @@ html { scroll-padding-top: 84px; }
 .sf-top { display: flex; flex-wrap: wrap; gap: 40px; }
 .sf-brand { flex: 1 1 220px; max-width: 300px; }
 .sf-brand-link { display: inline-flex; align-items: center; gap: 10px; color: var(--c-text); font-weight: 650; font-size: 1rem; }
+.sf-brand-link .sh-grid { width: 18px; height: 18px; color: var(--c-text2); }
 .sf-brand p { margin: 12px 0 14px; padding: 0; color: var(--c-text2); font-size: .88rem; line-height: 1.5; }
 .sf-brand-links a { display: inline-block; margin-right: 16px; color: var(--c-text2); font-size: .88rem; }
 .sf-brand-links a:hover { color: var(--c-text); }
@@ -234,7 +240,8 @@ html { scroll-padding-top: 84px; }
 /* ---------- Apps hub (/apps.html) ---------- */
 .hub { max-width: 1100px; margin: 0 auto; padding: 128px 20px 72px; color: var(--c-text); }
 .hub-hero { text-align: center; margin: 0 auto 48px; max-width: 680px; }
-.hub-hero img { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 22px; display: block; box-shadow: 0 18px 50px rgba(233,185,73,.18); }
+.hub-icons { display: flex; justify-content: center; gap: 12px; margin: 0 auto 26px; }
+.hub-icons img { width: 56px; height: 56px; border-radius: 13px; display: block; box-shadow: 0 0 0 1px rgba(255,255,255,.10), 0 14px 36px rgba(0,0,0,.45); }
 .hub-hero h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; color: var(--c-text); }
 .hub-hero p { margin: 0; color: var(--c-text2); font-size: 1.1rem; line-height: 1.6; }
 .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }

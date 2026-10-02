@@ -11,3 +11,10 @@ Re-render after editing:
 
 Then commit `og-image.png`. Facebook and LinkedIn cache aggressively; use their
 sharing debuggers to force a re-scrape after changing the art.
+
+`apps-og.html` renders `/og-apps.png`, the card for the `/apps.html` hub. Re-render it
+the same way (swap the two file names) when an app is added or changes its icon.
+
+The pages in this folder are internal tools. They are publicly reachable on GitHub Pages,
+so each one carries `<meta name="robots" content="noindex, nofollow">`, and
+`tools/build_chrome.py` never adds them to `sitemap.xml`.
