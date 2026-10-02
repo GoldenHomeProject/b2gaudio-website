@@ -1,27 +1,27 @@
 /* Progressive enhancement for the shared header. Navigation works without this file:
-   the Apps dropdown and the phone menu are <details> elements. This only adds the
-   behaviour <details> lacks: one menu open at a time, close on outside click, close on Escape. */
+   the app tabs are plain links in a strip that scrolls sideways, and "More" is a <details>.
+   This only (1) scrolls the current app's tab into view on narrow screens and
+   (2) closes the "More" panel on an outside click or Escape. */
 (function () {
-    var menus = document.querySelectorAll('.sh details');
-    if (!menus.length) return;
-    function closeAll(except) {
-        menus.forEach(function (d) { if (d !== except) d.open = false; });
+    var strip = document.querySelector('.sh-strip');
+    var cur = strip && strip.querySelector('.sh-tab.is-current');
+    if (strip && cur && strip.scrollWidth > strip.clientWidth) {
+        // Scroll only as far as needed to show the current tab clear of the right-edge fade,
+        // so the tabs before it (and "All apps") stay in view whenever they can.
+        var s = strip.getBoundingClientRect(), c = cur.getBoundingClientRect(), fade = 36;
+        if (c.right > s.right - fade) strip.scrollLeft += c.right - (s.right - fade);
     }
-    menus.forEach(function (d) {
-        d.addEventListener('toggle', function () { if (d.open) closeAll(d); });
-    });
+    if (strip) {   // fade the left edge too once tabs have scrolled off it
+        var mark = function () { strip.toggleAttribute('data-scrolled', strip.scrollLeft > 4); };
+        strip.addEventListener('scroll', mark, { passive: true });
+        mark();
+    }
+    var more = document.querySelector('.sh-more');
+    if (!more) return;
     document.addEventListener('click', function (e) {
-        menus.forEach(function (d) { if (d.open && !d.contains(e.target)) d.open = false; });
+        if (more.open && !more.contains(e.target)) more.open = false;
     });
     document.addEventListener('keydown', function (e) {
-        if (e.key !== 'Escape') return;
-        menus.forEach(function (d) {
-            if (d.open) { d.open = false; var s = d.querySelector('summary'); if (s) s.focus(); }
-        });
-    });
-    // Following an in-page link from the phone menu (e.g. Guides on the app's own page)
-    // should not leave the menu covering the section it just scrolled to.
-    document.querySelectorAll('.sh-menu-panel a').forEach(function (a) {
-        a.addEventListener('click', function () { closeAll(null); });
+        if (e.key === 'Escape' && more.open) { more.open = false; more.querySelector('summary').focus(); }
     });
 })();

@@ -3,21 +3,28 @@
 
     python3 tools/build_chrome.py
 
-Reads tools/apps.json and, for every *.html page at the site root:
-  * the <head> block   (<!-- site-head:start/end -->)   site-chrome.css + .js, and a favicon if the page has none
-  * the header         (<!-- site-header:start/end -->) "All apps" -> hub, app switcher, the page's app
-                                                         (icon + name, Home/Guides/Support/Privacy, Get the app)
-  * the footer         (<!-- site-footer:start/end -->) every app's links, the hub, contact, copyright
-  * on each app's home page, a "More apps" strip (<!-- more-apps:start/end -->)
+Reads tools/apps.json and, for every *.html page at the site root, fills these marker blocks:
+  * site-head    (<!-- site-head:start/end -->)    site-chrome.css + .js, and a favicon if the page has none
+  * site-header  (<!-- site-header:start/end -->)  one row of app tabs: "All apps" (-> hub), then every app
+                                                    by icon + name (current app highlighted), then the current
+                                                    app's "Get the app" button. More than MAX_TABS apps -> "More".
+  * site-footer  (<!-- site-footer:start/end -->)  every app's guides/support/privacy/terms, contact, copyright
+  * app-help     (<!-- app-help:start/end -->)     on each app's home page: "Guides & help" (every guide page of
+                                                    that app, plus Support / Privacy Policy / Terms of Service)
+  * breadcrumb   (<!-- breadcrumb:start/end -->)   on every other app page: "App › Guides › Page", with a
+                                                    separate BreadcrumbList JSON-LD block
+  * more-apps    (<!-- more-apps:start/end -->)    on each app's home page: the other apps
 It also regenerates apps.html (the hub) and sitemap.xml, and tags every App Store link it writes with
 its campaign (same rule as tools/tag_store_links.py, which is still worth running after hand edits).
 
-Idempotent: blocks are rewritten in place, so running it twice changes nothing. A page that has no
-markers yet is migrated once: its old <nav>...</nav> becomes the header block and its old
-<footer>...</footer> becomes the footer block. Everything else on the page is left byte-for-byte alone.
+Guides are found, not listed: every page that matches an app's "pages" globs and is not its home,
+support, privacy or terms page is a guide. Title = the page's <h1>; one-liner = the first sentence of its
+meta description; order = the order the app's home page links to them (new ones go last). Adding a guide
+page and re-running this script puts it in the home page's "Guides & help" and gives it a breadcrumb.
 
-Which app a page belongs to comes from each app's "pages" globs in apps.json. A page that matches
-no app gets the neutral header (the hub); the script refuses to guess for anything else.
+Idempotent: blocks are rewritten in place, so running it twice changes nothing. A page without markers
+is migrated once (old <nav>/<footer> become the header/footer blocks; the other blocks are inserted at
+fixed points). Everything outside the markers is left byte-for-byte alone.
 """
 from __future__ import annotations
 
@@ -27,6 +34,7 @@ import html
 import json
 import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -36,7 +44,10 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = json.loads((Path(__file__).with_name("apps.json")).read_text())
 SITE, APPS = DATA["site"], DATA["apps"]
 HUB = SITE["hub"]
+BASE = SITE["base_url"]
 
+MAX_TABS = 6                                             # apps shown as header tabs; the rest go under "More"
+HELP_ID = "guides-help"                                  # anchor of the "Guides & help" section on app homes
 HUB_ICON = "apps-icon.svg"                               # neutral favicon for the hub
 HUB_OG = "og-apps.png"                                   # 1200x630, rendered from og-builder/apps-og.html
 STORE = "https://apps.apple.com/app/apple-store/id{}"   # tag_store_links.py adds pt/ct/mt
@@ -53,6 +64,9 @@ CARET = ('<svg class="sh-caret" viewBox="0 0 10 10" aria-hidden="true"><path d="
 GRID = ('<svg class="sh-grid" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="6.5" height="6.5" rx="1.8"/>'
         '<rect x="11.5" y="2" width="6.5" height="6.5" rx="1.8"/><rect x="2" y="11.5" width="6.5" height="6.5" rx="1.8"/>'
         '<rect x="11.5" y="11.5" width="6.5" height="6.5" rx="1.8"/></svg>')
+DOC = ('<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h6.5L15 6v11.5H5z" fill="none" stroke="currentColor" '
+       'stroke-width="1.5" stroke-linejoin="round"/><path d="M7.5 9.5h5M7.5 12.5h5" stroke="currentColor" stroke-width="1.5" '
+       'stroke-linecap="round"/></svg>')
 
 esc = lambda s: html.escape(s, quote=True)
 
@@ -60,6 +74,12 @@ esc = lambda s: html.escape(s, quote=True)
 def start(name): return f"<!-- {name}:start -->"
 def end(name): return f"<!-- {name}:end -->"
 
+
+def block_re(name):
+    return re.compile(re.escape(start(name)) + r".*?" + re.escape(end(name)), re.S)
+
+
+ALL_BLOCKS = re.compile(r"<!-- ([a-z-]+):start -->.*?<!-- \1:end -->", re.S)
 
 # ---------------------------------------------------------------- data helpers
 
@@ -75,6 +95,8 @@ def file_of(href: str | None) -> str | None:
 
 
 def home_file(app): return file_of(app["home"])
+def help_href(app): return f'{app["home"]}#{HELP_ID}'
+def url_of(href): return BASE + ("" if href in ("/", "/index.html") else href.lstrip("/"))
 
 
 def app_for(page: str):
@@ -94,30 +116,74 @@ def badge(app):
     return '<span class="sh-badge">Coming soon</span>' if not live(app) else ""
 
 
-def app_links(app):
-    """The per-app links, in header order. Guides only when the app has some."""
-    out = [("Home", app["home"])]
-    if app.get("guides"):
-        out.append(("Guides", app["guides"]))
-    out += [("Support", app["support"]), ("Privacy", app["privacy"])]
+def text_of(fragment: str) -> str:
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", fragment))).strip()
+
+
+@lru_cache(maxsize=None)
+def page_meta(page: str):
+    """(h1 text, meta description) of a page, read from its own content (never from the chrome)."""
+    src = ALL_BLOCKS.sub("", (ROOT / page).read_text())
+    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", src, re.S)
+    desc = re.search(r'<meta name="description" content="([^"]*)"', src)
+    return (text_of(h1.group(1)) if h1 else page, html.unescape(desc.group(1)) if desc else "")
+
+
+def first_sentence(s: str) -> str:
+    m = re.match(r"(.+?[.!?])(\s|$)", s)
+    return m.group(1) if m else s
+
+
+@lru_cache(maxsize=None)
+def home_links(app_id: str):
+    """{guide file: link text} in the order the app's home page links to them (outside the chrome)."""
+    app = next(a for a in APPS if a["id"] == app_id)
+    src = ALL_BLOCKS.sub("", (ROOT / home_file(app)).read_text())
+    out = {}
+    for href, inner in re.findall(r'<a href="([^"#]+\.html)"[^>]*>(.*?)</a>', src, re.S):
+        out.setdefault(href.lstrip("/"), text_of(inner))
     return out
 
 
-# ---------------------------------------------------------------- renderers
+def special_pages(app):
+    return {home_file(app): "Home", file_of(app["support"]): "Support",
+            file_of(app["privacy"]): "Privacy Policy", file_of(app["terms"]): "Terms of Service"}
 
-def applinks(cur_app):
-    rows = []
-    for a in APPS:
-        cur = ' aria-current="true"' if cur_app is a else ""
-        rows.append(
-            f'<a class="sh-applink" href="{a["home"]}" style="--a:{a["accent"]}"{cur}>'
-            f'<img src="{a["icon"]}" alt="" width="40" height="40">'
-            f'<span><b>{esc(a["name"])}{badge(a)}</b><small>{esc(a["tagline"])}</small></span></a>')
-    rows.append(f'<a class="sh-all" href="{HUB}">See all apps <span aria-hidden="true">&rarr;</span></a>')
-    return "\n".join(rows)
+
+@lru_cache(maxsize=None)
+def guides_of(app_id: str):
+    """[(file, title, one-liner, short title)] for every guide page of an app."""
+    app = next(a for a in APPS if a["id"] == app_id)
+    special = special_pages(app)
+    files = sorted(p.name for p in ROOT.glob("*.html")
+                   if p.name not in special and p.name not in NOT_APP_PAGES
+                   and not any(fnmatch.fnmatch(p.name, g) for g in SKIP)
+                   and any(fnmatch.fnmatch(p.name, g) for g in app["pages"]))
+    order = list(home_links(app_id))
+    files.sort(key=lambda f: (order.index(f) if f in order else len(order), f))
+    out = []
+    for f in files:
+        title, desc = page_meta(f)
+        out.append((f, title, first_sentence(desc), home_links(app_id).get(f) or title))
+    return out
+
+
+# ---------------------------------------------------------------- header
+
+def tab(a, page, cur_app):
+    is_cur = a is cur_app
+    aria = ' aria-current="page"' if file_of(a["home"]) == page else (' aria-current="true"' if is_cur else "")
+    short = a.get("short", a["name"])
+    pill = '<span class="sh-pill">Soon</span>' if not live(a) else ""
+    return (f'<a class="sh-tab{" is-current" if is_cur else ""}" href="{a["home"]}" style="--a:{a["accent"]}"{aria}>'
+            f'<img src="{a["icon"]}" alt="" width="24" height="24">'
+            f'<span class="sh-name"><span class="sh-full">{esc(a["name"])}</span>'
+            f'<span class="sh-short" aria-hidden="true">{esc(short)}</span></span>{pill}</a>')
 
 
 def cta(app):
+    if app is None:
+        return ""
     if live(app):
         return (f'<a class="sh-cta" href="{store(app)}" aria-label="Get {esc(app["name"])} on the App Store">{APPLE}'
                 f'<span class="sh-cta-long">Get the app</span><span class="sh-cta-short">Get</span></a>')
@@ -125,46 +191,35 @@ def cta(app):
 
 
 def render_header(page, app):
-    # "All apps" goes to the hub; the caret beside it opens a quick app switcher (not needed on the hub itself).
-    home = (f'<a class="sh-home" href="{HUB}" aria-label="All apps"{current(HUB, page)}>{GRID}'
-            f'<span class="sh-home-label">All apps</span></a>')
-    apps_menu = (f'<details class="sh-apps"><summary><span class="sh-vh">Switch app</span>{CARET}</summary>\n'
-                 f'<div class="sh-apps-panel">\n{applinks(app)}\n</div></details>') if app else ""
-    if app is None:
-        style, cls = "", "sh sh-hub"
-        middle = '<span class="sh-spacer"></span>'
-        menu_app = ""
-    else:
-        style = f' style="--sh-accent:{app["accent"]};--sh-accent-text:{app["accent_text"]}"'
-        cls = "sh sh-app-page"
-        links = "".join(f'<a href="{h}"{current(h, page)}>{t}</a>' for t, h in app_links(app))
-        middle = (f'<span class="sh-div" aria-hidden="true"></span>\n'
-                  f'<a class="sh-app" href="{app["home"]}"{current(app["home"], page)}>'
-                  f'<img src="{app["icon"]}" alt="" width="30" height="30"><span>{esc(app["name"])}</span></a>\n'
-                  f'<nav class="sh-links" aria-label="{esc(app["name"])}">{links}</nav>\n'
-                  f'<span class="sh-spacer"></span>\n{cta(app)}')
-        mlinks = "".join(f'<a href="{h}"{current(h, page)}>{t}</a>'
-                         for t, h in app_links(app) + [("Terms", app["terms"])])
-        if live(app):
-            mlinks += (f'<a class="sh-cta" href="{store(app)}">{APPLE}Get {esc(app["name"])} on the App Store</a>')
-        menu_app = (f'<div class="sh-menu-h"><img src="{app["icon"]}" alt="" width="18" height="18">'
-                    f'{esc(app["name"])}{badge(app)}</div>\n'
-                    f'<nav class="sh-menu-links" aria-label="{esc(app["name"])}">{mlinks}</nav>\n')
-    menu = (f'<details class="sh-menu"><summary><span class="sh-vh">Menu</span><i></i><i></i><i></i></summary>\n'
-            f'<div class="sh-menu-panel">\n{menu_app}'
-            f'<div class="sh-menu-h">All apps</div>\n<nav aria-label="All apps">\n{applinks(app)}\n</nav>\n'
-            f'</div></details>')
-    lead = f'<div class="sh-lead">{home}{apps_menu}</div>'
-    return (f'<header class="{cls}"{style}>\n<div class="sh-bar">\n{lead}\n{middle}\n{menu}\n'
-            f'</div>\n</header>')
+    visible = APPS[:MAX_TABS]
+    if len(APPS) > MAX_TABS and app is not None and app not in visible:
+        visible = APPS[:MAX_TABS - 1] + [app]           # the current app always gets a tab
+    extra = [a for a in APPS if a not in visible]
+    all_tab = (f'<a class="sh-tab sh-tab-all" href="{HUB}" aria-label="All apps"{current(HUB, page)}>{GRID}'
+               f'<span class="sh-name">All apps</span></a>')
+    tabs = "\n".join([all_tab] + [tab(a, page, app) for a in visible])
+    more = ""
+    if extra:
+        rows = "\n".join(
+            f'<a class="sh-applink" href="{a["home"]}" style="--a:{a["accent"]}">'
+            f'<img src="{a["icon"]}" alt="" width="36" height="36">'
+            f'<span><b>{esc(a["name"])}{badge(a)}</b><small>{esc(a["tagline"])}</small></span></a>' for a in extra)
+        more = (f'\n<details class="sh-more"><summary>More {CARET}</summary>\n'
+                f'<div class="sh-more-panel">\n{rows}\n</div></details>')
+    style = (f' style="--sh-accent:{app["accent"]};--sh-accent-text:{app["accent_text"]}"' if app else "")
+    return (f'<header class="sh"{style}>\n<div class="sh-bar">\n'
+            f'<nav class="sh-nav" aria-label="Our apps">\n<div class="sh-strip">\n{tabs}\n</div>{more}\n</nav>\n'
+            f'{cta(app)}\n</div>\n</header>')
 
+
+# ---------------------------------------------------------------- footer, more apps, help, breadcrumb
 
 def render_footer(page, app):
     cols = []
     for a in APPS:
         items = []
-        if a.get("guides"):
-            items.append(("Guides", a["guides"]))
+        if guides_of(a["id"]):
+            items.append(("Guides", help_href(a)))
         items += [("Support", a["support"]), ("Privacy Policy", a["privacy"]), ("Terms of Service", a["terms"])]
         if live(a):
             items.append(("App Store", store(a)))
@@ -198,6 +253,47 @@ def render_more(page, app):
             f'<a class="sm-all" href="{HUB}">See all apps &rarr;</a>\n</div>\n</section>')
 
 
+def render_help(page, app):
+    guides = guides_of(app["id"])
+    cards = "\n".join(
+        f'<a class="sg-card" href="{f}"><b>{esc(title)}</b><small>{esc(line)}</small>'
+        f'<span class="sg-go">Read the guide &rarr;</span></a>' for f, title, line, _ in guides)
+    links = "".join(f'<a class="sg-link" href="{h}">{DOC}{t}</a>' for t, h in
+                    [("Support", app["support"]), ("Privacy Policy", app["privacy"]), ("Terms of Service", app["terms"])])
+    heading = f'{esc(app["name"])} guides &amp; help' if guides else f'{esc(app["name"])} help'
+    sub = ("Step-by-step guides, plus support and the policies that cover the app." if guides
+           else "Support and the policies that cover the app.")
+    grid = f'<div class="sg-grid">\n{cards}\n</div>\n' if guides else ""
+    return (f'<section class="sg" id="{HELP_ID}" aria-labelledby="sg-h" style="--a:{app["accent"]}">\n'
+            f'<div class="sg-inner">\n<h2 class="sg-h" id="sg-h">{heading}</h2>\n<p class="sg-sub">{sub}</p>\n'
+            f'{grid}<div class="sg-help">{links}</div>\n</div>\n</section>')
+
+
+def crumbs_for(page, app):
+    special = special_pages(app)
+    trail = [(app["name"], app["home"])]
+    if page in special:
+        trail.append((special[page], None))
+    else:
+        g = {f: short for f, _, _, short in guides_of(app["id"])}
+        trail += [("Guides", help_href(app)), (g.get(page) or page_meta(page)[0], None)]
+    return trail
+
+
+def render_breadcrumb(page, app):
+    trail = crumbs_for(page, app)
+    items = []
+    for i, (name, href) in enumerate(trail):
+        sep = '<span class="bc-sep" aria-hidden="true">&rsaquo;</span>' if i else ""
+        body = f'<a href="{href}">{esc(name)}</a>' if href else f'<span aria-current="page">{esc(name)}</span>'
+        items.append(f"<li>{sep}{body}</li>")
+    ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": i, "name": name, "item": url_of(href) if href else url_of(page)}
+        for i, (name, href) in enumerate(trail, 1)]}
+    return (f'<nav class="bc" aria-label="Breadcrumb" style="--a:{app["accent"]}"><ol>{"".join(items)}</ol></nav>\n'
+            f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
+
+
 def render_head(page, app, page_html):
     out = ['<link rel="stylesheet" href="site-chrome.css">', '<script src="site-chrome.js" defer></script>']
     if 'rel="icon"' not in page_html:             # several legal pages never had one
@@ -208,8 +304,9 @@ def render_head(page, app, page_html):
     return "\n".join(out)
 
 
+# ---------------------------------------------------------------- hub
+
 def render_hub():
-    base = SITE["base_url"]
     cards = []
     for a in APPS:
         s = store(a)
@@ -223,7 +320,8 @@ def render_hub():
         else:
             actions.append(f'<a class="hub-btn primary" href="{a["home"]}">Learn more</a>')
             actions.append('<span class="hub-btn disabled">Not on the App Store yet</span>')
-        links = [("Guides", a.get("guides")), ("Support", a["support"]), ("Privacy", a["privacy"]), ("Terms", a["terms"])]
+        links = [("Guides", help_href(a) if guides_of(a["id"]) else None), ("Support", a["support"]),
+                 ("Privacy", a["privacy"]), ("Terms", a["terms"])]
         links = "".join(f'<a href="{h}">{t}</a>' for t, h in links if h)
         cards.append(f"""<article class="hub-card" id="{a['id']}" style="--a:{a['accent']};--at:{a['accent_text']}">
   <div class="hub-card-top"><img src="{a['icon']}" alt="{esc(a['name'])} app icon" width="68" height="68">
@@ -236,10 +334,10 @@ def render_hub():
 </article>""")
     ld = {
         "@context": "https://schema.org", "@type": "CollectionPage",
-        "name": SITE["hub_title"], "url": base + HUB, "description": SITE["hub_description"],
+        "name": SITE["hub_title"], "url": BASE + HUB, "description": SITE["hub_description"],
         "mainEntity": {"@type": "ItemList", "itemListElement": [
-            {"@type": "ListItem", "position": i, "name": a["name"],
-             "url": base + (a["home"].lstrip("/"))} for i, a in enumerate(APPS, 1)]},
+            {"@type": "ListItem", "position": i, "name": a["name"], "url": url_of(a["home"])}
+            for i, a in enumerate(APPS, 1)]},
     }
     title, desc = SITE["hub_title"], SITE["hub_description"]
     return f"""<!DOCTYPE html>
@@ -250,20 +348,20 @@ def render_hub():
 <!-- Generated by tools/build_chrome.py from tools/apps.json. Do not edit by hand. -->
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<link rel="canonical" href="{base}{HUB}">
+<link rel="canonical" href="{BASE}{HUB}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{esc(title)}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:url" content="{base}{HUB}">
-<meta property="og:image" content="{base}{HUB_OG}">
+<meta property="og:url" content="{BASE}{HUB}">
+<meta property="og:image" content="{BASE}{HUB_OG}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{esc(title)}: {esc(', '.join(a['name'] for a in APPS))}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{esc(title)}">
 <meta name="twitter:description" content="{esc(desc)}">
-<meta name="twitter:image" content="{base}{HUB_OG}">
+<meta name="twitter:image" content="{BASE}{HUB_OG}">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 body{{background:#0A0A0F;color:#F5F5F7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}}
@@ -300,27 +398,40 @@ body{{background:#0A0A0F;color:#F5F5F7;font-family:-apple-system,BlinkMacSystemF
 APP_MENU = re.compile(r"\n?<!-- app-menu:start -->.*?<!-- app-menu:end -->\n?", re.S)
 OLD_NAV = re.compile(r'<nav>\s*<div class="nav-inner">.*?</nav>', re.S)
 OLD_FOOTER = re.compile(r"<footer>.*?</footer>", re.S)
+FEATURES = re.compile(r'<section\b[^>]*\bid="features"[^>]*>.*?</section>', re.S)
+CONTENT_OPEN = re.compile(r'<main\b[^>]*>|<div class="content">')
 
 
-def block_re(name):
-    return re.compile(re.escape(start(name)) + r".*?" + re.escape(end(name)), re.S)
+def empty(name): return f"{start(name)}\n{end(name)}"
 
 
 def migrate(page, src, app):
-    """One-time: swap a page's old nav/footer for empty marker blocks."""
+    """Insert any marker blocks a page is missing (first run, or a newly added page)."""
     if start("site-header") not in src:
         src = APP_MENU.sub("\n", src)
         if len(OLD_NAV.findall(src)) != 1:
             sys.exit(f"build_chrome: {page}: expected exactly one old <nav><div class=\"nav-inner\"> to replace")
-        src = OLD_NAV.sub(lambda m: f"{start('site-header')}\n{end('site-header')}", src, count=1)
+        src = OLD_NAV.sub(lambda m: empty("site-header"), src, count=1)
     if start("site-footer") not in src:
         if len(OLD_FOOTER.findall(src)) != 1:
             sys.exit(f"build_chrome: {page}: expected exactly one old <footer> to replace")
-        src = OLD_FOOTER.sub(lambda m: f"{start('site-footer')}\n{end('site-footer')}", src, count=1)
+        src = OLD_FOOTER.sub(lambda m: empty("site-footer"), src, count=1)
     if start("site-head") not in src:
-        src = src.replace("</head>", f"{start('site-head')}\n{end('site-head')}\n</head>", 1)
-    if app and page == home_file(app) and start("more-apps") not in src:
-        src = src.replace(start("site-footer"), f"{start('more-apps')}\n{end('more-apps')}\n\n{start('site-footer')}", 1)
+        src = src.replace("</head>", f"{empty('site-head')}\n</head>", 1)
+    if app and page == home_file(app):
+        if start("more-apps") not in src:
+            src = src.replace(start("site-footer"), f"{empty('more-apps')}\n\n{start('site-footer')}", 1)
+        if start("app-help") not in src:
+            m = FEATURES.search(src)
+            if m:   # right after the features section
+                src = src[:m.end()] + f"\n\n{empty('app-help')}" + src[m.end():]
+            else:   # no features section: just before "More apps"
+                src = src.replace(start("more-apps"), f"{empty('app-help')}\n\n{start('more-apps')}", 1)
+    elif app and start("breadcrumb") not in src:
+        m = CONTENT_OPEN.search(src, src.find(end("site-header")))
+        if not m:
+            sys.exit(f"build_chrome: {page}: no <main> or <div class=\"content\"> to put the breadcrumb in")
+        src = src[:m.end()] + f"\n{empty('breadcrumb')}" + src[m.end():]
     return src
 
 
@@ -341,8 +452,9 @@ def build_page(path: Path, src: str | None = None):
     src = fill(src, "site-head", render_head(page, app, without_head_block))
     src = fill(src, "site-header", render_header(page, app))
     src = fill(src, "site-footer", render_footer(page, app))
-    if start("more-apps") in src:
-        src = fill(src, "more-apps", render_more(page, app))
+    for name, render in (("more-apps", render_more), ("app-help", render_help), ("breadcrumb", render_breadcrumb)):
+        if start(name) in src:
+            src = fill(src, name, render(page, app))
     src = tag(src, campaign_for(path))
     if src != before:
         path.write_text(src)
@@ -361,7 +473,7 @@ def build_sitemap(pages):
     today = datetime.date.today().isoformat()
     rows = []
     for page in pages:
-        loc = SITE["base_url"] + ("" if page == "index.html" else page)
+        loc = url_of(page)
         mod, pri = old.get(loc, (today, "0.7"))
         rows.append(f"  <url><loc>{loc}</loc><lastmod>{mod}</lastmod><priority>{pri}</priority></url>")
     out = ('<?xml version="1.0" encoding="UTF-8"?>\n'

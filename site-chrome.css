@@ -1,4 +1,5 @@
-/* Shared site chrome: header (.sh), footer (.sf), "More apps" strip (.sm) and the apps hub (.hub).
+/* Shared site chrome: header (.sh), footer (.sf), "Guides & help" (.sg), breadcrumb (.bc),
+   "More apps" strip (.sm) and the apps hub (.hub).
    The markup is written into every page by tools/build_chrome.py from tools/apps.json.
    CSS-only changes need no rebuild.
 
@@ -8,85 +9,73 @@
 
 html { scroll-padding-top: 84px; }
 
-.sh, .sf, .sm, .hub {
+.sh, .sf, .sm, .sg, .bc, .hub {
     --c-bg: #0A0A0F; --c-surface: #151520; --c-surface2: #1E1E2E;
     --c-text: #F5F5F7; --c-text2: #A1A1AA; --c-text3: #71717A; --c-border: #2A2A3A;
     --c-gold: #E9B949;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
     line-height: 1.45; -webkit-font-smoothing: antialiased; text-align: left;
 }
-.sh *, .sf *, .sm *, .hub * { box-sizing: border-box; }
-.sh a, .sf a, .sm a, .hub a, .sh a:hover, .sf a:hover, .sm a:hover, .hub a:hover { text-decoration: none; }
-.sh nav, .sf nav {
+.sh *, .sf *, .sm *, .sg *, .bc *, .hub * { box-sizing: border-box; }
+.sh a, .sf a, .sm a, .sg a, .hub a, .sh a:hover, .sf a:hover, .sm a:hover, .sg a:hover, .hub a:hover { text-decoration: none; }
+.sh nav, .sf nav, nav.bc {
     position: static; top: auto; width: auto; z-index: auto;
     background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
 }
 .sh ul, .sf ul { list-style: none; margin: 0; padding: 0; }
 .sh li, .sf li { margin: 0; padding: 0; }
-.sh summary, .sm summary { list-style: none; }
+.sh summary { list-style: none; }
 .sh summary::-webkit-details-marker { display: none; }
-.sh-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.sh :focus-visible, .sf :focus-visible, .sm :focus-visible, .hub :focus-visible {
-    outline: 2px solid var(--sh-accent, var(--c-gold)); outline-offset: 2px; border-radius: 8px;
+.sh :focus-visible, .sf :focus-visible, .sm :focus-visible, .sg :focus-visible, .bc :focus-visible, .hub :focus-visible {
+    outline: 2px solid var(--a, var(--sh-accent, var(--c-gold))); outline-offset: 2px; border-radius: 8px;
 }
 
 /* App icons sit on a near-black page and some (B2Gaudio) are near-black themselves: a hairline keeps their shape. */
-.sh-app img, .sh-applink img, .sh-menu-h img, .sf-app-h img, .sm-card img, .hub-card-top img { box-shadow: 0 0 0 1px rgba(255,255,255,.10); }
+.sh-tab img, .sh-applink img, .sf-app-h img, .sm-card img, .hub-card-top img { box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
 
-/* ---------- Header ---------- */
+/* ---------- Header: one row of app tabs ---------- */
 .sh {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 64px;
-    background: rgba(10, 10, 15, .9);
+    background: rgba(10, 10, 15, .92);
     -webkit-backdrop-filter: saturate(1.4) blur(20px); backdrop-filter: saturate(1.4) blur(20px);
     border-bottom: 1px solid var(--c-border); color: var(--c-text);
 }
 .sh-bar {
     max-width: 1160px; height: 100%; margin: 0 auto; padding: 0 20px;
-    display: flex; align-items: center; gap: 4px;
+    display: flex; align-items: stretch; gap: 14px;
 }
-/* "All apps" (link to the hub) + a caret that opens the quick app switcher, drawn as one split control. */
-.sh-lead {
-    position: relative; display: flex; align-items: stretch; flex: none; height: 40px;
-    border: 1px solid rgba(255,255,255,.22); border-radius: 10px;
-    background: rgba(255,255,255,.07);
+.sh-nav { display: flex; align-items: stretch; flex: 1 1 auto; min-width: 0; }
+/* The tabs scroll sideways when they don't fit (phones); navigation never needs JavaScript. */
+.sh-strip {
+    display: flex; align-items: stretch; gap: 2px; min-width: 0;
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
 }
-.sh-home {
-    display: flex; align-items: center; gap: 9px; padding: 0 14px; border-radius: 9px;
-    color: var(--c-text); font-size: 1rem; font-weight: 600; white-space: nowrap;
+.sh-strip::-webkit-scrollbar { display: none; }
+.sh-tab {
+    position: relative; display: flex; align-items: center; gap: 9px; flex: none;
+    padding: 0 12px;
+    color: var(--c-text2); font-size: .93rem; font-weight: 600; letter-spacing: -.005em; white-space: nowrap;
+    transition: color .15s, background .15s;
 }
-.sh-home:hover, .sh-home[aria-current] { color: #fff; background: rgba(255,255,255,.10); }
-.sh-grid { width: 20px; height: 20px; flex: none; fill: currentColor; display: block; }
-
-.sh-apps { position: static; display: flex; flex: none; }
-.sh-apps > summary {
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    width: 38px; border-left: 1px solid rgba(255,255,255,.22); border-radius: 0 9px 9px 0;
-    color: var(--c-text);
+.sh-tab:hover { color: var(--c-text); background: rgba(255,255,255,.045); }
+.sh-tab img { width: 24px; height: 24px; border-radius: 6px; flex: none; display: block; }
+.sh-tab.is-current { color: #fff; }
+.sh-tab.is-current::after, .sh-tab-all[aria-current]::after {
+    content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px;
+    border-radius: 3px 3px 0 0; background: var(--a);
 }
-.sh-apps > summary:hover, .sh-apps[open] > summary { color: var(--c-text); background: rgba(255,255,255,.06); }
-.sh-caret { width: 12px; height: 12px; transition: transform .2s; }
-.sh-apps[open] .sh-caret { transform: rotate(180deg); }
-.sh-apps-panel {
-    position: absolute; top: calc(100% + 12px); left: 0; width: 360px; padding: 8px;
-    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 14px;
-    box-shadow: 0 24px 60px rgba(0,0,0,.55);
+.sh-tab-all { color: var(--c-text); font-size: .86rem; padding: 0 14px 0 4px; margin-right: 6px; }
+.sh-tab-all::before {   /* divider between "All apps" and the app tabs */
+    content: ""; position: absolute; right: -4px; top: 18px; bottom: 18px; width: 1px; background: var(--c-border);
 }
-.sh-applink {
-    display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px;
-    color: var(--c-text);
+.sh-tab-all[aria-current]::after { background: var(--c-text); left: 4px; }
+.sh-grid { width: 18px; height: 18px; flex: none; fill: currentColor; display: block; }
+.sh-short { display: none; }
+.sh-pill {
+    padding: 1px 6px; border-radius: 999px; border: 1px solid rgba(233,185,73,.5);
+    color: var(--c-gold); font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; line-height: 1.5;
 }
-.sh-applink:hover { background: rgba(255,255,255,.06); }
-.sh-applink[aria-current] { background: rgba(255,255,255,.05); box-shadow: inset 3px 0 0 var(--a); }
-.sh-applink img { width: 40px; height: 40px; border-radius: 10px; flex: none; }
-.sh-applink b { display: block; font-size: .95rem; font-weight: 600; color: var(--c-text); }
-.sh-applink small { display: block; font-size: .8rem; line-height: 1.35; color: var(--c-text2); }
-.sh-all {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 6px; padding: 12px 10px 6px; border-top: 1px solid var(--c-border);
-    color: var(--c-text2); font-size: .85rem; font-weight: 500;
-}
-.sh-all:hover { color: var(--c-text); }
-
 .sh-badge {
     display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
     border: 1px solid rgba(233,185,73,.45); color: var(--c-gold);
@@ -94,92 +83,110 @@ html { scroll-padding-top: 84px; }
     vertical-align: 2px; line-height: 1.6; white-space: nowrap;
 }
 
-.sh-div { width: 1px; height: 26px; background: var(--c-border); margin: 0 12px 0 8px; flex: none; }
-.sh-app {
-    display: flex; align-items: center; gap: 9px; min-width: 0;
-    color: var(--c-text); font-size: 1.02rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+/* More than six apps: the rest live under "More" (outside the scrolling strip so the panel isn't clipped). */
+.sh-more { position: relative; display: flex; flex: none; }
+.sh-more > summary {
+    display: flex; align-items: center; gap: 6px; padding: 0 12px; cursor: pointer;
+    color: var(--c-text2); font-size: .93rem; font-weight: 600;
 }
-.sh-app:hover { color: #fff; }
-.sh-app img { width: 30px; height: 30px; border-radius: 7px; flex: none; }
-.sh-app span { overflow: hidden; text-overflow: ellipsis; }
-
-.sh-links { display: flex; align-items: center; gap: 2px; margin-left: 14px; }
-.sh-links a {
-    padding: 8px 10px; border-radius: 8px;
-    color: var(--c-text2); font-size: .9rem; font-weight: 500; white-space: nowrap;
+.sh-more > summary:hover, .sh-more[open] > summary { color: var(--c-text); background: rgba(255,255,255,.045); }
+.sh-caret { width: 10px; height: 10px; transition: transform .2s; }
+.sh-more[open] .sh-caret { transform: rotate(180deg); }
+.sh-more-panel {
+    position: absolute; top: calc(100% + 8px); right: 0; width: 320px; padding: 8px; z-index: 2;
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.55);
 }
-.sh-links a:hover { color: var(--c-text); background: rgba(255,255,255,.05); }
-.sh-links a[aria-current] { color: var(--c-text); box-shadow: inset 0 -2px 0 var(--sh-accent); border-radius: 8px 8px 0 0; }
+.sh-applink { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; color: var(--c-text); }
+.sh-applink:hover { background: rgba(255,255,255,.06); }
+.sh-applink img { width: 36px; height: 36px; border-radius: 9px; flex: none; }
+.sh-applink b { display: block; font-size: .95rem; font-weight: 600; color: var(--c-text); }
+.sh-applink small { display: block; font-size: .8rem; line-height: 1.35; color: var(--c-text2); }
 
-.sh-spacer { flex: 1 1 auto; min-width: 8px; }
 .sh-cta {
-    display: inline-flex; align-items: center; gap: 7px; flex: none;
+    align-self: center; display: inline-flex; align-items: center; gap: 7px; flex: none;
     padding: 9px 16px; border-radius: 999px;
     background: var(--sh-accent); color: var(--sh-accent-text, #fff);
     font-size: .88rem; font-weight: 650; white-space: nowrap; line-height: 1.2;
-    transition: filter .15s, transform .15s;
+    transition: filter .15s;
 }
 .sh-cta:hover { color: var(--sh-accent-text, #fff); filter: brightness(1.1); }
 .sh-cta svg { width: 15px; height: 15px; fill: currentColor; flex: none; }
+.sh-cta-short { display: none; }
 .sh-soon {
-    flex: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--c-border);
+    align-self: center; flex: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--c-border);
     color: var(--c-text2); font-size: .8rem; font-weight: 600; white-space: nowrap;
 }
 
-/* Mobile menu: a <details> disclosure, so it opens and closes with no JavaScript at all. */
-.sh-menu { display: none; flex: none; margin-left: 8px; }
-.sh-menu > summary {
-    display: flex; flex-direction: column; justify-content: center; gap: 5px; cursor: pointer;
-    width: 42px; height: 40px; padding: 0 10px;
-    border: 1px solid var(--c-border); border-radius: 10px;
+/* Tablets and phones: short names, and a fade on the right edge says "there's more, swipe". */
+@media (max-width: 860px) {
+    .sh-bar { padding: 0 12px; gap: 10px; }
+    .sh-full { display: none; }
+    .sh-short { display: inline; }
+    .sh-tab { padding: 0 10px; gap: 7px; font-size: .9rem; }
+    .sh-tab img { width: 22px; height: 22px; }
+    .sh-tab-all { padding: 0 10px 0 2px; margin-right: 4px; }
+    .sh-tab-all .sh-name { display: none; }
+    .sh-tab-all[aria-current]::after { left: 2px; right: 8px; }
+    .sh-strip {
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+        padding-right: 22px;
+    }
+    .sh-strip[data-scrolled] {
+        -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+        mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+    }
+    .sh-pill { display: none; }
 }
-.sh-menu > summary:hover { border-color: var(--c-text3); }
-.sh-menu > summary > i {
-    display: block; height: 2px; width: 100%; border-radius: 2px; background: var(--c-text);
-    transition: transform .25s, opacity .2s;
-}
-.sh-menu[open] > summary > i:nth-child(2) { transform: translateY(7px) rotate(45deg); }
-.sh-menu[open] > summary > i:nth-child(3) { opacity: 0; }
-.sh-menu[open] > summary > i:nth-child(4) { transform: translateY(-7px) rotate(-45deg); }
-.sh-menu-panel {
-    position: absolute; top: 100%; left: 0; right: 0;
-    max-height: calc(100vh - 64px); overflow-y: auto; overscroll-behavior: contain;
-    padding: 6px 20px 24px; background: var(--c-surface);
-    border-bottom: 1px solid var(--c-border); box-shadow: 0 30px 60px rgba(0,0,0,.6);
-}
-.sh-menu-h {
-    display: flex; align-items: center; gap: 8px;
-    padding: 18px 0 6px; color: var(--c-text3);
-    font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-}
-.sh-menu-h img { width: 18px; height: 18px; border-radius: 5px; }
-.sh-menu-links a {
-    display: block; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.06);
-    color: var(--c-text); font-size: 1rem; font-weight: 500;
-}
-.sh-menu-links a[aria-current] { color: var(--sh-accent); }
-.sh-menu-links .sh-cta { display: flex; justify-content: center; margin-top: 16px; padding: 13px 16px; border: 0; font-size: .95rem; color: var(--sh-accent-text, #fff); }
-.sh-menu .sh-applink { padding: 10px 0; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,.06); }
-.sh-menu .sh-applink[aria-current] { background: none; box-shadow: none; }
-.sh-menu .sh-applink[aria-current] b { color: var(--a); }
-.sh-menu .sh-all { border-top: 0; padding: 14px 0 0; }
-
-@media (max-width: 959px) {
-    .sh-apps, .sh-links { display: none; }
-    .sh-menu { display: block; }
-    .sh-app-page .sh-home-label { display: none; }
-    .sh-app-page .sh-home { padding: 0 10px; }
-    .sh-app-page .sh-div { margin: 0 10px 0 6px; }
-}
-@media (max-width: 420px) {
-    .sh-bar { padding: 0 14px; }
-    .sh-app-page .sh-div, .sh-soon { display: none; }
-    .sh-app { margin-left: 8px; gap: 8px; }
+@media (max-width: 480px) {
     .sh-cta-long { display: none; }
+    .sh-cta-short { display: inline; }
     .sh-cta { padding: 9px 13px; }
-    .sh-app { font-size: .98rem; }
+    .sh-soon { padding: 6px 9px; font-size: .74rem; }
 }
-@media (min-width: 421px) { .sh-cta-short { display: none; } }
+@media (max-width: 360px) {
+    .sh-bar { padding: 0 8px; gap: 8px; }
+    .sh-cta-short { display: none; }
+    .sh-cta { padding: 9px 11px; }
+    .sh-tab { padding: 0 8px; }
+    .sh-soon { display: none; }
+}
+
+/* ---------- Breadcrumb (top of every app sub-page) ---------- */
+nav.bc { display: block; margin: 0 0 22px; padding: 0; font-size: .88rem; line-height: 1.5; }
+.bc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; row-gap: 2px; }
+.bc li { display: inline-flex; align-items: center; margin: 0; padding: 0; color: #D4D4D8; font-size: .88rem; }
+.bc a { color: var(--c-text2); text-decoration: none; }
+.bc a:hover { color: var(--c-text); text-decoration: underline; text-decoration-color: var(--a); text-underline-offset: 3px; }
+.bc-sep { margin: 0 9px; color: #52525B; }
+
+/* ---------- "Guides & help" (each app's home page) ---------- */
+.sg { display: block; margin: 0; padding: 72px 20px; border-top: 1px solid var(--c-border); background: none; text-align: left; }
+.sg-inner { max-width: 1100px; margin: 0 auto; }
+.sg-h { margin: 0 0 8px; padding: 0; color: var(--c-text); font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; text-align: center; }
+.sg-sub { margin: 0 auto 32px; padding: 0; max-width: 600px; color: var(--c-text2); font-size: 1rem; text-align: center; }
+.sg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.sg-card {
+    display: flex; flex-direction: column; padding: 18px 20px;
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 14px;
+    color: var(--c-text); transition: border-color .2s, transform .2s;
+}
+.sg-card:hover { border-color: var(--a); transform: translateY(-2px); }
+.sg-card b { display: block; margin: 0 0 6px; color: var(--c-text); font-size: 1rem; font-weight: 650; line-height: 1.3; }
+.sg-card small { display: block; color: var(--c-text2); font-size: .88rem; line-height: 1.5; }
+.sg-go { display: block; margin-top: auto; padding-top: 12px; color: var(--a); font-size: .85rem; font-weight: 600; }
+.sg-help { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 28px; }
+.sg-link {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;
+    border: 1px solid var(--c-border); border-radius: 999px; color: var(--c-text); font-size: .92rem; font-weight: 600;
+}
+.sg-link:hover { border-color: var(--a); color: var(--c-text); }
+.sg-link svg { width: 16px; height: 16px; color: var(--a); flex: none; }
+@media (max-width: 600px) {
+    .sg { padding: 56px 20px; }
+    .sg-h { font-size: 1.6rem; }
+}
 
 /* ---------- Footer ---------- */
 .sf {
@@ -281,16 +288,4 @@ html { scroll-padding-top: 84px; }
     .hub { padding-top: 104px; }
     .hub-card { padding: 22px; }
     .hub-grid { grid-template-columns: 1fr; }
-}
-
-/* Smallest phones (320-360px): the Get button keeps its icon and accessible name, drops the word,
-   so the app's name has room. */
-@media (max-width: 360px) {
-    .sh-cta-short { display: none; }
-    .sh-cta { padding: 9px 11px; }
-    .sh-bar { padding: 0 10px; gap: 2px; }
-    .sh-spacer { min-width: 0; }
-    .sh-app img { width: 28px; height: 28px; }
-    .sh-app { font-size: .92rem; margin-left: 6px; }
-    .sh-menu { margin-left: 6px; }
 }

@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source of truth for the site chrome (header, footer, 'More apps' strip) and the /apps.html hub. Edit, then run: python3 tools/build_chrome.py  -- see tools/README.md. Every piece of copy here must already appear on the app's own page; do not invent claims.",
+  "_comment": "Single source of truth for the site chrome (header app tabs, footer, 'Guides & help', breadcrumbs, 'More apps' strip) and the /apps.html hub. Order here = order of the header tabs. Guides are discovered from each app's 'pages' globs. Edit, then run: python3 tools/build_chrome.py  -- see tools/README.md. Every piece of copy here must already appear on the app's own page; do not invent claims.",
   "site": {
     "hub": "apps.html",
     "hub_title": "Our Apps",
@@ -12,6 +12,7 @@
     {
       "id": "b2gaudio",
       "name": "B2Gaudio",
+      "short": "B2Gaudio",
       "icon": "favicon.png",
       "accent": "#FF6B35",
       "accent_text": "#FFFFFF",
@@ -20,7 +21,6 @@
       "summary": "Turn every phone in the room into one synchronized sound system. Music, podcasts, audiobooks, and video — in sync over WiFi.",
       "platform": "iPhone and iPad",
       "home": "/",
-      "guides": "/#guides",
       "support": "support.html",
       "privacy": "privacy.html",
       "terms": "terms.html",
@@ -30,6 +30,7 @@
     {
       "id": "drivemail",
       "name": "DriveMail Voice",
+      "short": "DriveMail",
       "icon": "drivemail-logo.png",
       "accent": "#4A90D9",
       "accent_text": "#FFFFFF",
@@ -38,7 +39,6 @@
       "summary": "The hands-free email app for drivers. DriveMail Voice reads your unread emails aloud, lets you reply by voice, and works with Apple CarPlay.",
       "platform": "iPhone and CarPlay",
       "home": "drivemail.html",
-      "guides": "drivemail.html#questions",
       "support": "drivemail-support.html",
       "privacy": "drivemail-privacy.html",
       "terms": "drivemail-terms.html",
@@ -48,6 +48,7 @@
     {
       "id": "digitaldecks",
       "name": "Digital Decks",
+      "short": "Decks",
       "icon": "digitaldecks-icon.png",
       "accent": "#2FA8FF",
       "accent_text": "#04182E",
@@ -56,7 +57,6 @@
       "summary": "Point your camera at a Pokémon card and see what it is, how rare it is, and roughly what it's worth. Then build real decks from the cards you own. No ads, no accounts.",
       "platform": "iPhone and iPad",
       "home": "digitaldecks.html",
-      "guides": "digitaldecks.html#guides",
       "support": "digitaldecks-support.html",
       "privacy": "digitaldecks-privacy.html",
       "terms": "digitaldecks-terms.html",
@@ -66,6 +66,7 @@
     {
       "id": "commonhealth",
       "name": "CommonHealth",
+      "short": "CommonHealth",
       "icon": "commonhealth-icon.png",
       "accent": "#3FBF7F",
       "accent_text": "#04140B",
@@ -74,7 +75,6 @@
       "summary": "CommonHealth reads your denial letter, finds the rule that actually applies, and writes the appeal for you to review and send. Your records never leave your phone.",
       "platform": "iPhone",
       "home": "commonhealth.html",
-      "guides": null,
       "support": "commonhealth-support.html",
       "privacy": "commonhealth-privacy.html",
       "terms": "commonhealth-terms.html",
